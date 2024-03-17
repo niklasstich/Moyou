@@ -1,0 +1,1 @@
+// Error LAMA0037 on `MementoCreateHook`: `The aspect 'MementoCreateHook' cannot be applied to the method 'HasTooManyParameters.CreateMementoHook(int, int)' because 'HasTooManyParameters.CreateMementoHook(int, int)' must have exactly one parameter.`

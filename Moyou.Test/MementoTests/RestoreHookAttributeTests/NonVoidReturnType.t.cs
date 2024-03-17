@@ -1,0 +1,1 @@
+// Error LAMA0037 on `MementoRestoreHook`: `The aspect 'MementoRestoreHook' cannot be applied to the method 'NonVoidReturnType.RestoreMementoHook()' because the return type of 'NonVoidReturnType.RestoreMementoHook()' must be of type 'Void'.`

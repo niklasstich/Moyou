@@ -1,0 +1,1 @@
+// Error LAMA0037 on `MementoCreateHook`: `The aspect 'MementoCreateHook' cannot be applied to the method 'NonVoidReturnType.CreateMementoHook()' because the return type of 'NonVoidReturnType.CreateMementoHook()' must be of type 'Void'.`
