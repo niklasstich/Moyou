@@ -23,9 +23,9 @@ internal class TwoValidHooks : global::Moyou.Aspects.Memento.IOriginator
     global::Moyou.Aspects.Memento.IMemento memento;
     memento = (global::Moyou.Aspects.Memento.IMemento)this.CreateMementoImpl();
     this.CreateMementoHook((global::Moyou.CompileTimeTest.MementoTests.CreateHookAttributeTests.TwoValidHooks.Memento)memento);
-    memento_1 = (global::Moyou.Aspects.Memento.IMemento)memento;
+    memento_1 = (global::Moyou.Aspects.Memento.IMemento)memento!;
     this.CreateMementoHook2((global::Moyou.CompileTimeTest.MementoTests.CreateHookAttributeTests.TwoValidHooks.Memento)memento_1);
-    return (global::Moyou.Aspects.Memento.IMemento)memento_1;
+    return (global::Moyou.Aspects.Memento.IMemento)memento_1!;
   }
   private global::Moyou.Aspects.Memento.IMemento CreateMementoImpl()
   {
@@ -41,8 +41,6 @@ internal class TwoValidHooks : global::Moyou.Aspects.Memento.IOriginator
     try
     {
       var cast = ((global::Moyou.CompileTimeTest.MementoTests.CreateHookAttributeTests.TwoValidHooks.Memento)memento);
-      if (cast is null)
-        return;
     }
     catch (global::System.InvalidCastException icex)
     {

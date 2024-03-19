@@ -33,8 +33,6 @@ internal class ValidRestoreHook : global::Moyou.Aspects.Memento.IOriginator
     try
     {
       var cast = ((global::Moyou.CompileTimeTest.MementoTests.RestoreHookAttributeTests.ValidRestoreHook.Memento)memento);
-      if (cast is null)
-        return;
     }
     catch (global::System.InvalidCastException icex)
     {

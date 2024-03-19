@@ -17,7 +17,7 @@ internal class ValidCreateHook : global::Moyou.Aspects.Memento.IOriginator
     global::Moyou.Aspects.Memento.IMemento memento;
     memento = (global::Moyou.Aspects.Memento.IMemento)this.CreateMementoImpl();
     this.CreateMementoHook((global::Moyou.CompileTimeTest.MementoTests.CreateHookAttributeTests.ValidCreateHook.Memento)memento);
-    return (global::Moyou.Aspects.Memento.IMemento)memento;
+    return (global::Moyou.Aspects.Memento.IMemento)memento!;
   }
   private global::Moyou.Aspects.Memento.IMemento CreateMementoImpl()
   {
@@ -33,8 +33,6 @@ internal class ValidCreateHook : global::Moyou.Aspects.Memento.IOriginator
     try
     {
       var cast = ((global::Moyou.CompileTimeTest.MementoTests.CreateHookAttributeTests.ValidCreateHook.Memento)memento);
-      if (cast is null)
-        return;
     }
     catch (global::System.InvalidCastException icex)
     {

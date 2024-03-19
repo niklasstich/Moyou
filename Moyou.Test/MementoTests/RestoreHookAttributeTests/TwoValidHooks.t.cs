@@ -40,8 +40,6 @@ internal class TwoValidHooks : global::Moyou.Aspects.Memento.IOriginator
     try
     {
       var cast = ((global::Moyou.CompileTimeTest.MementoTests.RestoreHookAttributeTests.TwoValidHooks.Memento)memento);
-      if (cast is null)
-        return;
     }
     catch (global::System.InvalidCastException icex)
     {
