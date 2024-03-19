@@ -3,10 +3,10 @@
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning disable CS0169 // Field is never used
 
-namespace Moyou.CompileTimeTest;
+namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
 
 [Memento]
-internal class MementoTest
+internal class ValidMementoTest
 {
     public int A { get; set; }
     private string B { get; set; }
@@ -26,7 +26,7 @@ internal class MementoTest
     public readonly object K;
     public List<object> L { get; set; }
     public CloneableDummy M { get; set; }
-    public IDictionary<int,int> N { get; set; }
+    public Dictionary<int, int> N { get; set; }
 
 
     private record Memento

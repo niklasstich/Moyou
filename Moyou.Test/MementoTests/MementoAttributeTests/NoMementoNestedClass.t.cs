@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Memento`: `The aspect 'Memento' cannot be applied to the type 'NoMementoNestedClass' because 'NoMementoNestedClass' must contain a nested private class, (struct) record or struct called 'Memento''.`

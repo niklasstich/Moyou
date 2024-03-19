@@ -13,6 +13,7 @@ public class MementoDummyTest
         var item2 = new object();
         var enumerable = new List<object> { initialObj, item2 };
         var initialCloneable = new CloneableDummy { Foo = 1 };
+        var enumerable2 = new List<CloneableDummy> { initialCloneable };
         var mementoDummy = new MementoDummy
         {
             A = 1,
@@ -21,7 +22,9 @@ public class MementoDummyTest
             E = initialObj,
             F = 2,
             L = enumerable,
-            M = initialCloneable
+            M = initialCloneable,
+            N = new Dictionary<int, int>{{1, 123}, {2, 222}},
+            O = enumerable2
         };
 
         //double check that values are as expected before changing them 
@@ -37,6 +40,10 @@ public class MementoDummyTest
             Assert.That(mementoDummy.L[1], Is.EqualTo(item2));
             Assert.That(mementoDummy.M.Foo, Is.EqualTo(1));
             Assert.That(mementoDummy.M, Is.EqualTo(initialCloneable));
+            Assert.That(mementoDummy.N, Is.EquivalentTo(new Dictionary<int, int> { { 1, 123 }, { 2, 222 } }));
+            Assert.That(mementoDummy.O, Has.Count.EqualTo(1));
+            Assert.That(mementoDummy.O[0], Is.EqualTo(initialCloneable));
+            Assert.That(mementoDummy.Hook, Is.Null);
         });
 
         // Act
@@ -47,8 +54,12 @@ public class MementoDummyTest
         var newObj = new object();
         mementoDummy.E = newObj;
         mementoDummy.F = 4;
+        mementoDummy.L.RemoveAll(_ => true);
         mementoDummy.L.Add(new object());
+        mementoDummy.N[1] = 321;
+        mementoDummy.N.Remove(2);
         mementoDummy.M.Foo = 2;
+        mementoDummy.O.Clear();
         
 
         mementoDummy.RestoreMemento(memento);
@@ -67,6 +78,10 @@ public class MementoDummyTest
             Assert.That(mementoDummy.L[1], Is.EqualTo(item2));
             Assert.That(mementoDummy.M.Foo, Is.EqualTo(1));
             Assert.That(mementoDummy.M, Is.Not.EqualTo(initialCloneable));
+            Assert.That(mementoDummy.N, Is.EquivalentTo(new Dictionary<int, int> { { 1, 123 }, { 2, 222 } }));
+            Assert.That(mementoDummy.O, Has.Count.EqualTo(1));
+            Assert.That(mementoDummy.O[0], Is.EqualTo(initialCloneable));
+            Assert.That(mementoDummy.Hook, Is.EqualTo("hook set and restored"));
         });
     }
 }

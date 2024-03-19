@@ -21,7 +21,9 @@ public class MementoRestoreHookAttribute : MethodAspect
     public override void BuildAspect(IAspectBuilder<IMethod> builder)
     {
         base.BuildAspect(builder);
-        var restoreMementoMethod = builder.Target.DeclaringType.Methods.First(method => method.Name == "RestoreMemento");
+        var restoreMementoMethod = builder.Target.DeclaringType.Methods.FirstOrDefault(method => method.Name == "RestoreMemento");
+        if (restoreMementoMethod == null) //aspect is on type but there is no RestoreMemento method - ergo building the method must've failed
+            return;
         builder.Advice.Override(restoreMementoMethod, nameof(RestoreMementoTemplate),
                        args: new { target = builder.Target, });
     }
@@ -32,6 +34,6 @@ public class MementoRestoreHookAttribute : MethodAspect
         meta.Proceed();
         var memento = target.Parameters[0].Value;
         target.Invoke(memento);
-        return memento;
+        return memento!;
     }
 }

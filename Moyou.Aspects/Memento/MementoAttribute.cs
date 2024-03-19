@@ -1,39 +1,64 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Moyou.Aspects.Extensions;
-using System.Diagnostics;
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 
 namespace Moyou.Aspects.Memento;
 
 public class MementoAttribute : TypeAspect
 {
+    /// <summary>
+    /// Defines the strictness of the memento aspect.
+    /// </summary>
+    /// <remarks>
+    /// See <seealso cref="MementoStrictnessMode"/> for details.
+    /// </remarks>
+    public MementoStrictnessMode StrictnessMode { get; set; } = MementoStrictnessMode.Strict;
+
+    /// <summary>
+    /// Defines which members of the target type should be included in the memento.
+    /// </summary>
+    /// <remarks>
+    /// See <seealso cref="MementoMemberMode"/> for details.
+    /// </remarks>
+    public MementoMemberMode MemberMode { get; set; } = MementoMemberMode.All;
+
+    public static readonly DiagnosticDefinition<(IFieldOrProperty, INamedType, INamedType)> NonSupportedMemberInStrictMode =
+        new("MOYOU1001", Severity.Warning,
+            $$"""Member {0} of type {1} on type {2} is neither a value type nor implements ICloneable nor is a supported standard collection and {{nameof(MementoAttribute)}} is set to {{nameof(MementoStrictnessMode.Strict)}}. Please either implement ICloneable on type {1} or mark the member with the {{nameof(MementoIgnoreAttribute)}} and manage storing and restoring the state of the member manually in hook methods marked with the {{nameof(MementoCreateHookAttribute)}} and {{nameof(MementoRestoreHookAttribute)}} or alternatively mark {2}'s Memento attribute as {{nameof(MementoStrictnessMode.Loose)}} to apply value-type assigning semantics to all unsupported members."""
+            );
+
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         base.BuildAspect(builder);
-        //ignore auto backing fields of properties because restoring properties via setter is sufficient
-        //(and will also trigger for example INotifyPropertyChanged)
-        //for backing fields of non-auto properties, we have no choice but to restore them twice, once via the field and once via the property
-        //unless we TODO: figure out a way to determine that a field is a backing field for a non-auto property (e.g. heuristically by analyzing the property setter/getter)
-        var fields = builder.Target.AllFields
-            .Where(field => !field.IsAutoBackingField());
-        //only collect properties with a setter, as we can only restore properties with a setter
-        var properties = builder.Target.AllProperties;
 
-        //filter ignored members
-        var relevantFieldsAndProperties = fields
-            .Union<IFieldOrProperty>(properties)
-            .Where(prop => prop.Writeability == Writeability.All)
-            .Where(fieldOrProp =>
-                fieldOrProp.Attributes.All(attr => attr.Type.FullName != typeof(MementoIgnoreAttribute).FullName)
-            )
+        var relevantMembers = GetRelevantMembers()
             .ToList();
+
+        if (StrictnessMode is MementoStrictnessMode.Strict)
+        {
+            var membersWithUnsupportedTypes =
+                relevantMembers.Where(member => !IsTypeOfMemberSupported(member)).ToList();
+            foreach (var unsupportedType in membersWithUnsupportedTypes)
+            {
+                builder.Diagnostics.Report(
+                    NonSupportedMemberInStrictMode.WithArguments((unsupportedType, (INamedType)unsupportedType.Type,
+                        builder.Target)), unsupportedType);
+            }
+
+            relevantMembers = relevantMembers.Except(membersWithUnsupportedTypes).ToList();
+        }
 
         var nestedMementoType = builder.Target.NestedTypes.First(NestedTypeIsEligible);
 
         //introduce relevant fields and properties to the memento type
-        var mementoTypeFields = IntroduceMementoTypeFields().ToList();
+        var introducedFieldsOnMemento = IntroduceMementoTypeFields().ToList();
+
+
 
         builder.Advice.ImplementInterface(nestedMementoType, typeof(IMemento), OverrideStrategy.Ignore);
 
@@ -41,35 +66,70 @@ public class MementoAttribute : TypeAspect
 
 
         builder.Advice.IntroduceMethod(builder.Target, nameof(RestoreMementoImpl),
-            args: new
-            {
-                nestedType = nestedMementoType,
-                relevantMembers = relevantFieldsAndProperties,
-                introducedMementoTypeMembers = mementoTypeFields
-            }, scope: IntroductionScope.Instance, whenExists: OverrideStrategy.Override, buildMethod: builder =>
+            args: new { nestedMementoType, relevantMembers, introducedFieldsOnMemento },
+            scope: IntroductionScope.Instance, whenExists: OverrideStrategy.Override, buildMethod: builder =>
             {
                 builder.Accessibility = Accessibility.Private;
             });
 
         builder.Advice.IntroduceMethod(builder.Target, nameof(CreateMementoImpl),
-            args: new
-            {
-                //nestedType = nestedMementoType,
-                relevantMembers = relevantFieldsAndProperties,
-                introducedMementoTypeMembers = mementoTypeFields,
-                TNestedType = nestedMementoType
-            }, scope: IntroductionScope.Instance, whenExists: OverrideStrategy.Override, buildMethod: builder =>
+            args: new { TMementoType = nestedMementoType, relevantMembers, introducedFieldsOnMemento, builder },
+            scope: IntroductionScope.Instance, whenExists: OverrideStrategy.Override, buildMethod: builder =>
             {
                 builder.Accessibility = Accessibility.Private;
             });
 
         return;
 
-        IEnumerable<IField> IntroduceMementoTypeFields() => relevantFieldsAndProperties
+        IEnumerable<IField> IntroduceMementoTypeFields() => relevantMembers
             .Select(fieldOrProperty => builder.Advice.IntroduceField(nestedMementoType, fieldOrProperty.Name,
                 fieldOrProperty.Type, IntroductionScope.Instance,
                 buildField: fBuilder => fBuilder.Accessibility = Accessibility.Public))
             .Select(r => r.Declaration);
+
+        IEnumerable<IFieldOrProperty> GetRelevantMembers()
+        {
+            return (MemberMode switch
+            {
+                MementoMemberMode.All => GetRelevantFields().Union(GetRelevantProperties()),
+                MementoMemberMode.FieldsOnly => GetRelevantFields(),
+                MementoMemberMode.PropertiesOnly => GetRelevantProperties(),
+                _ => throw new InvalidOperationException($"Invalid value for {nameof(MemberMode)}")
+            })
+                //Only collect members we can write to
+                .Where(member => member.Writeability == Writeability.All)
+                //Only collect members that don't have the MementoIgnoreAttribute 
+                .Where(member => !member.HasAttribute(typeof(MementoIgnoreAttribute)));
+        }
+
+        IEnumerable<IFieldOrProperty> GetRelevantFields()
+        {
+            //TODO: figure out a way to determine that a field is a backing field for a non-auto property (e.g. heuristically by analyzing the property setter/getter)?
+            return builder.Target.AllFields
+                .Where(field => !field.IsAutoBackingField());
+        }
+
+        IEnumerable<IFieldOrProperty> GetRelevantProperties()
+        {
+            return builder.Target.AllProperties;
+        }
+
+        bool IsTypeOfMemberSupported(IFieldOrProperty member)
+        {
+            var knownCollectionTypes = new[]
+            {
+                typeof(Dictionary<,>), typeof(List<>), typeof(HashSet<>), typeof(ReadOnlyCollection<>),
+                typeof(ReadOnlyDictionary<,>), typeof(FrozenDictionary<,>), typeof(FrozenSet<>),
+                typeof(ImmutableList<>), typeof(ImmutableHashSet<>), typeof(ImmutableArray<>),
+                typeof(ImmutableDictionary<,>), typeof(ImmutableSortedDictionary<,>), typeof(ImmutableSortedSet<>),
+                typeof(Lookup<,>)
+            };
+            var type = member.Type;
+            return !(type.IsReferenceType ?? false) ||
+                   type.GetType().IsArray ||
+                   type.Is(typeof(ICloneable)) ||
+                   knownCollectionTypes.Select(ct => type.Is(ct, ConversionKind.TypeDefinition)).Any(b => b);
+        }
     }
 
     public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
@@ -77,7 +137,9 @@ public class MementoAttribute : TypeAspect
         base.BuildEligibility(builder);
         builder.MustSatisfy(type => type.NestedTypes.Any(NestedTypeIsEligible),
             type =>
-                $"{type.Description} must contain a nested private class, (struct) record or struct called 'Memento''.");
+                $"{type.Description} must contain a nested private class, (struct) record or struct called 'Memento''");
+        builder.MustNotBeAbstract();
+        builder.MustNotBeInterface();
     }
 
     private static bool NestedTypeIsEligible(INamedType nestedType)
@@ -103,21 +165,21 @@ public class MementoAttribute : TypeAspect
 
     [Template]
     public void RestoreMementoImpl(IMemento memento,
-        [CompileTime] INamedType nestedType,
+        [CompileTime] INamedType nestedMementoType,
         [CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
-        [CompileTime] IEnumerable<IFieldOrProperty> introducedMementoTypeMembers
+        [CompileTime] IEnumerable<IFieldOrProperty> introducedFieldsOnMemento
     )
     {
         try
         {
-            var cast = meta.Cast(nestedType, memento);
-            if (cast is null) return;
+            var cast = meta.Cast(nestedMementoType, memento);
+            //if (cast is null) return;
             //prevent multiple enumerations
-            var mementoTypeMembers = introducedMementoTypeMembers.ToList();
+            var mementoTypeMembers = introducedFieldsOnMemento.ToList();
             foreach (var fieldOrProp in relevantMembers)
             {
                 var nestedTypeMember =
-                    mementoTypeMembers.First(m => m.Name == fieldOrProp.Name).With((IExpression)cast);
+                    mementoTypeMembers.First(m => m.Name == fieldOrProp.Name).With((IExpression)cast!);
                 fieldOrProp.Value = nestedTypeMember.Value;
             }
         }
@@ -128,37 +190,77 @@ public class MementoAttribute : TypeAspect
     }
 
     [Template]
-    public IMemento CreateMementoImpl<[CompileTime] TNestedType>([CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
-        [CompileTime] IEnumerable<IFieldOrProperty> introducedMementoTypeMembers
-    ) where TNestedType : IMemento, new()
+    public IMemento CreateMementoImpl<[CompileTime] TMementoType>(
+        [CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
+        [CompileTime] IEnumerable<IFieldOrProperty> introducedFieldsOnMemento,
+        IAspectBuilder<INamedType> builder) where TMementoType : IMemento, new()
     {
-        var memento = new TNestedType();
+        var memento = new TMementoType();
         //prevent multiple enumerations
         var relevantMembersList = relevantMembers.ToList();
-        foreach (var fieldOrProp in relevantMembersList)
+        var introducedFieldsOnMementoList = introducedFieldsOnMemento.ToList();
+        foreach (var sourceFieldOrProp in relevantMembersList)
         {
             //assign some fields
-            var memFieldOrProp = introducedMementoTypeMembers.Single(memFieldOrProp => memFieldOrProp.Name == fieldOrProp.Name).With(memento);
-            if (fieldOrProp.Type.Is(typeof(ICloneable)))
+            var targetFieldOrProp = introducedFieldsOnMementoList
+                .Single(memFieldOrProp => memFieldOrProp.Name == sourceFieldOrProp.Name).With(memento);
+            meta.DebugBreak();
+            if (!(sourceFieldOrProp.Type.IsReferenceType ?? false))
+                targetFieldOrProp.Value = sourceFieldOrProp.Value;
+            else if (sourceFieldOrProp.Type.Is(typeof(ICloneable)))
             {
-                memFieldOrProp.Value = meta.Cast(fieldOrProp.Type, fieldOrProp.Value is not null ? fieldOrProp.Value.Clone() : null);
+                targetFieldOrProp.Value = meta.Cast(sourceFieldOrProp.Type,
+                    sourceFieldOrProp.Value is not null ? sourceFieldOrProp.Value?.Clone() : null);
             }
-            ///TODO: handle collections
-            else if (fieldOrProp.Type.Is(SpecialType.IEnumerable_T, ConversionKind.TypeDefinition))
+            else if (sourceFieldOrProp.Type.Is(SpecialType.IEnumerable_T, ConversionKind.TypeDefinition))
             {
-                meta.DebugBreak();
+                HandleIEnumerable(sourceFieldOrProp, targetFieldOrProp, builder);
             }
-            else if (fieldOrProp.Type.Is(SpecialType.List_T, ConversionKind.TypeDefinition))
+            else if (StrictnessMode == MementoStrictnessMode.Strict)
             {
-                var typeArg = (fieldOrProp.Type as INamedType).TypeArguments.First();
-                meta.DebugBreak();
+                builder.Diagnostics.Report(NonSupportedMemberInStrictMode.WithArguments((sourceFieldOrProp, (INamedType)sourceFieldOrProp.Type, builder.Target)));
             }
             else
             {
-                memFieldOrProp.Value = fieldOrProp.Value;
+                targetFieldOrProp.Value = sourceFieldOrProp.Value;
             }
         }
 
         return memento;
+
+    }
+
+    [Template]
+    private void HandleIEnumerable(IFieldOrProperty sourceFieldOrProp, IExpression targetFieldOrProp,
+        IAspectBuilder<INamedType> builder)
+    {
+        var namedType = (INamedType)sourceFieldOrProp.Type;
+        //copy-via-To[Collection]() types
+        if (namedType.Is(typeof(Dictionary<,>), ConversionKind.TypeDefinition))
+            targetFieldOrProp.Value = sourceFieldOrProp.Value?.ToDictionary();
+        else if (namedType.Is(typeof(List<>), ConversionKind.TypeDefinition))
+            targetFieldOrProp.Value = sourceFieldOrProp.Value?.ToList();
+        else if (namedType.Is(typeof(HashSet<>), ConversionKind.TypeDefinition))
+            targetFieldOrProp.Value = sourceFieldOrProp.Value?.ToHashSet();
+        else if (namedType.GetType().IsArray)
+            targetFieldOrProp.Value = sourceFieldOrProp.Value?.ToArray();
+
+        //assign immutable collections directly
+        else if (namedType.Is(typeof(ReadOnlyCollection<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ReadOnlyDictionary<,>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(FrozenDictionary<,>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(FrozenSet<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableList<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableHashSet<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableArray<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableDictionary<,>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableSortedDictionary<,>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(ImmutableSortedSet<>), ConversionKind.TypeDefinition) ||
+                 namedType.Is(typeof(Lookup<,>), ConversionKind.TypeDefinition))
+            targetFieldOrProp.Value = sourceFieldOrProp.Value;
+
+        //fallback, should never reach this point
+        else
+            targetFieldOrProp.Value = sourceFieldOrProp.Value;
     }
 }

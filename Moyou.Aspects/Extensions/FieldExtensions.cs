@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Moyou.Aspects.Extensions;
 [CompileTime]
-public static class FieldExtensions
+internal static class FieldExtensions
 {
     private const string BackingFieldRegex = ".*<(.*)>k__BackingField";
 

@@ -2,7 +2,9 @@
 
 namespace Moyou.UnitTest.Memento;
 
-[Memento]
+#pragma warning disable 0649
+#pragma warning disable 8618
+[Memento(StrictnessMode = MementoStrictnessMode.Loose)]
 internal partial class MementoDummy
 {
     public int A { get; set; }
@@ -24,12 +26,29 @@ internal partial class MementoDummy
     public List<object> L { get; set; }
 
     public CloneableDummy M { get; set; }
-    public IDictionary<int,int> N { get; set; }
+    public Dictionary<int,int> N { get; set; }
+    public List<CloneableDummy> O { get; set; }
+
+
+    [MementoIgnore]
+    public string? Hook { get; set; }
+
+    [MementoCreateHook]
+    private void CreateHook(Memento memento)
+    {
+        memento.Hook = "hook set";
+    }
+
+    [MementoRestoreHook]
+    private void RestoreHook(Memento memento)
+    {
+        this.Hook = memento.Hook + " and restored";
+    }
 
 
     private record Memento
     {
-
+        public string? Hook { get; set; }
     }
 }
 
@@ -44,3 +63,5 @@ public class CloneableDummy : ICloneable
         };
     }
 }
+#pragma warning restore 0649
+#pragma warning restore 8618
