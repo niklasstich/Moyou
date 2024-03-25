@@ -1,6 +1,7 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Moyou.Aspects.Extensions;
 
 namespace Moyou.Aspects.Memento;
 

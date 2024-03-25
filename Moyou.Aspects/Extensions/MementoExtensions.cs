@@ -1,13 +1,8 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Moyou.Aspects.Memento;
+namespace Moyou.Aspects.Extensions;
 
 [CompileTime]
 public static class MementoExtensions
