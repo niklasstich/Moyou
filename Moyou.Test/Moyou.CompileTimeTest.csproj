@@ -45,8 +45,4 @@
 		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="MementoTests\MementoIgnoreAttributeTests\" />
-	</ItemGroup>
-
 </Project>
