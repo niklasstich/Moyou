@@ -1,11 +1,12 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System.Text.RegularExpressions;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System.Text.RegularExpressions;
+
 #pragma warning disable SYSLIB1045 //can't use runtime regex in compile time code
 
-namespace Moyou.Aspects.Extensions;
+namespace Moyou.Extensions;
 [CompileTime]
-internal static class FieldExtensions
+public static class FieldExtensions
 {
     private const string BackingFieldRegex = ".*<(.*)>k__BackingField";
 

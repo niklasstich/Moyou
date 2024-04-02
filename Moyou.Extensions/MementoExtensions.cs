@@ -2,7 +2,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Moyou.Aspects.Extensions;
+namespace Moyou.Extensions;
 
 [CompileTime]
 public static class MementoExtensions

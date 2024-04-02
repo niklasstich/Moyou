@@ -42,7 +42,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.csproj" />
+		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.Memento\Moyou.Aspects.Memento.csproj" />
 	</ItemGroup>
 
 </Project>

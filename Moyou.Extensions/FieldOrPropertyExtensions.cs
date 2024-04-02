@@ -1,10 +1,11 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
 
-namespace Moyou.Aspects.Extensions;
+namespace Moyou.Extensions;
 
 [CompileTime]
-internal static class FieldOrPropertyExtensions
+public static class FieldOrPropertyExtensions
 {
     public static bool HasAttribute(this IFieldOrProperty fieldOrProperty, Type attributeType) =>
         fieldOrProperty.Attributes.Any(attribute => attribute.Type.FullName == attributeType.FullName);

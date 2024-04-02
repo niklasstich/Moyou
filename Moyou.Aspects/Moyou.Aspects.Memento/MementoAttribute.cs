@@ -2,10 +2,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Moyou.Aspects.Extensions;
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using Moyou.Extensions;
 
 namespace Moyou.Aspects.Memento;
 
