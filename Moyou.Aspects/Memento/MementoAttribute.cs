@@ -207,6 +207,8 @@ public class MementoAttribute : TypeAspect
             meta.DebugBreak();
             if (!(sourceFieldOrProp.Type.IsReferenceType ?? false))
                 targetFieldOrProp.Value = sourceFieldOrProp.Value;
+            else if (sourceFieldOrProp.Type.Is(SpecialType.String, ConversionKind.TypeDefinition)) //strings are immutable
+                targetFieldOrProp.Value = sourceFieldOrProp.Value;
             else if (sourceFieldOrProp.Type.Is(typeof(ICloneable)))
             {
                 targetFieldOrProp.Value = meta.Cast(sourceFieldOrProp.Type,

@@ -42,7 +42,7 @@ internal class ValidMementoTest : global::Moyou.Aspects.Memento.IOriginator
     memento.D = this.D;
     memento._e = this._e;
     memento.A = this.A;
-    memento.B = ((global::System.String)(this.B is not null ? this.B.Clone() : null));
+    memento.B = this.B;
     memento.E = this.E;
     memento.L = this.L.ToList();
     memento.M = ((global::Moyou.CompileTimeTest.MementoTests.MementoAttributeTests.CloneableDummy)(this.M is not null ? this.M.Clone() : null));

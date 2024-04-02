@@ -34,7 +34,7 @@ public class PropertiesOnly : global::Moyou.Aspects.Memento.IOriginator
   {
     var memento = new global::Moyou.CompileTimeTest.MementoTests.MementoAttributeTests.PropertiesOnly.Memento();
     memento.A = this.A;
-    memento.B = ((global::System.String)(this.B is not null ? this.B.Clone() : null));
+    memento.B = this.B;
     memento.E = this.E;
     memento.F = this.F;
     memento.L = this.L.ToList();

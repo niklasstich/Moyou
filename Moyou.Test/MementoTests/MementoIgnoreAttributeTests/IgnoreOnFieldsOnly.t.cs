@@ -18,7 +18,7 @@ public class IgnoreOnFieldsOnly : global::Moyou.Aspects.Memento.IOriginator
   private global::Moyou.Aspects.Memento.IMemento CreateMementoImpl()
   {
     var memento = new global::Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests.IgnoreOnFieldsOnly.Memento();
-    memento._dontIgnoreMe = ((global::System.String)(this._dontIgnoreMe is not null ? this._dontIgnoreMe.Clone() : null));
+    memento._dontIgnoreMe = this._dontIgnoreMe;
     return (global::Moyou.Aspects.Memento.IMemento)memento;
   }
   public void RestoreMemento(global::Moyou.Aspects.Memento.IMemento memento)

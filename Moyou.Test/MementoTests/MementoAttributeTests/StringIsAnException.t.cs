@@ -1,14 +1,12 @@
 using Moyou.Aspects.Memento;
-namespace Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests;
-[Memento(StrictnessMode = MementoStrictnessMode.Loose)]
-public class IgnoreOneMember : global::Moyou.Aspects.Memento.IOriginator
+namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
+[Memento]
+public class StringIsAnException : global::Moyou.Aspects.Memento.IOriginator
 {
-  [MementoIgnore]
-  public string IgnoreMe { get; set; }
-  public string DontIgnoreMe { get; set; }
+  public string DontCloneMe { get; set; }
   private record Memento : global::Moyou.Aspects.Memento.IMemento
   {
-    public global::System.String DontIgnoreMe;
+    public global::System.String DontCloneMe;
   }
   public global::Moyou.Aspects.Memento.IMemento CreateMemento()
   {
@@ -16,8 +14,8 @@ public class IgnoreOneMember : global::Moyou.Aspects.Memento.IOriginator
   }
   private global::Moyou.Aspects.Memento.IMemento CreateMementoImpl()
   {
-    var memento = new global::Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests.IgnoreOneMember.Memento();
-    memento.DontIgnoreMe = this.DontIgnoreMe;
+    var memento = new global::Moyou.CompileTimeTest.MementoTests.MementoAttributeTests.StringIsAnException.Memento();
+    memento.DontCloneMe = this.DontCloneMe;
     return (global::Moyou.Aspects.Memento.IMemento)memento;
   }
   public void RestoreMemento(global::Moyou.Aspects.Memento.IMemento memento)
@@ -28,8 +26,8 @@ public class IgnoreOneMember : global::Moyou.Aspects.Memento.IOriginator
   {
     try
     {
-      var cast = ((global::Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests.IgnoreOneMember.Memento)memento);
-      this.DontIgnoreMe = ((global::Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests.IgnoreOneMember.Memento)cast!).DontIgnoreMe;
+      var cast = ((global::Moyou.CompileTimeTest.MementoTests.MementoAttributeTests.StringIsAnException.Memento)memento);
+      this.DontCloneMe = ((global::Moyou.CompileTimeTest.MementoTests.MementoAttributeTests.StringIsAnException.Memento)cast!).DontCloneMe;
     }
     catch (global::System.InvalidCastException icex)
     {
