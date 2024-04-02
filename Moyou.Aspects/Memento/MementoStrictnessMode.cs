@@ -15,7 +15,7 @@ public enum MementoStrictnessMode
     /// </summary>
     Loose,
     /// <summary>
-    /// In this mode, the memento attribute will throw an exception when it encounters a member that is neither a value type, a known default collection type nor implements <see cref="ICloneable"/>.
+    /// In this mode, the memento attribute will throw a warning when it encounters a member that is neither a value type, a known default collection type nor implements <see cref="ICloneable"/>.
     /// You must then either implement the <see cref="ICloneable"/> interface or mark the member with the <see cref="MementoIgnoreAttribute"/> and manage storing and restoring the state of the member manually in hook methods marked with the
     /// <see cref="MementoCreateHookAttribute"/> and <see cref="MementoRestoreHookAttribute"/>.
     /// </summary>
