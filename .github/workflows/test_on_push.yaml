@@ -1,4 +1,4 @@
-name: Build and Test on push to master or PR
+name: Build and Test
 on:
     push:
         branches:
@@ -10,12 +10,11 @@ on:
         - .gitignore
         - AuthoringTool/electron.manifest.json
     pull_request:
-  
 jobs:
     build-and-test:
         strategy:
             matrix:
-                os: [ubuntu-latest, windows-lates, macos-latest]
+                os: [ubuntu-latest, windows-latest, macos-latest]
                 dotnet-version: ['8.x']
         runs-on: ${{ matrix.os }}
         name: Build and Test on ${{ matrix.os }} with .NET Core ${{ matrix.dotnet-version }}
