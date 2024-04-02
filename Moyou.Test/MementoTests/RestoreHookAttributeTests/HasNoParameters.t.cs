@@ -1,0 +1,1 @@
+// Error LAMA0037 on `Memento`: `The aspect 'Memento' cannot be applied to the type 'HasNoParameters' because 'HasNoParameters' must contain a nested private class, (struct) record or struct called 'Memento''.`

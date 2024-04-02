@@ -1,0 +1,1 @@
+// Error LAMA0037 on `MementoRestoreHook`: `The aspect 'MementoRestoreHook' cannot be applied to the method 'NoMementoAttribute.RestoreMementoHook()' because the declaring type 'NoMementoAttribute' must have an aspect of type MementoAttribute.`
