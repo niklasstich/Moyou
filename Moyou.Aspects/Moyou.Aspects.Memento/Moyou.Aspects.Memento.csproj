@@ -12,6 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\Moyou.Diagnostics\Moyou.Diagnostics.csproj" />
 	  <ProjectReference Include="..\..\Moyou.Extensions\Moyou.Extensions.csproj" />
 	</ItemGroup>
 
