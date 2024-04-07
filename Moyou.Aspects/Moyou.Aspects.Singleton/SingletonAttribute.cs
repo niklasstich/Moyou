@@ -1,6 +1,6 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Advising;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Moyou.Diagnostics;
@@ -44,7 +44,7 @@ public class SingletonAttribute : TypeAspect
                 .Where(constructor => constructor.Accessibility != Accessibility.Private)
                 .Select(constructor => constructor.Parameters)
                 .Select(parameters => parameters.Select(parameter => parameter.Type.ToDisplayString()))
-                .Select(strings => string.Join(",", strings))
+                .Select(stringList => string.Join(",", stringList))
                 .Select(str => string.IsNullOrWhiteSpace(str) ? "void" : str)
                 .Select(str => $"({str})");
             var constructorSignaturesString = string.Join(", ", constructorSignatures);
@@ -55,27 +55,28 @@ public class SingletonAttribute : TypeAspect
         var lazyGeneric = typeof(Lazy<>).MakeGenericType([builder.Target.ToType()]);
 
         // add private lazy field
-        var fieldInitializerBuilder = new ExpressionBuilder();
-        fieldInitializerBuilder.AppendVerbatim("new ");
-        // fieldInitializerBuilder.AppendTypeName(lazyGeneric);
-        fieldInitializerBuilder.AppendVerbatim("(() => new ");
-        fieldInitializerBuilder.AppendTypeName(builder.Target);
-        fieldInitializerBuilder.AppendVerbatim("())");
-
         builder.Advice.IntroduceField(builder.Target, "_instance", lazyGeneric, IntroductionScope.Static,
-            OverrideStrategy.Override,
-            fbuilder => fbuilder.InitializerExpression = fieldInitializerBuilder.ToExpression());
-
+            OverrideStrategy.Override);
+        builder.Advice.AddInitializer(builder.Target, nameof(CreateLazyInstance), InitializerKind.BeforeTypeConstructor,
+            args: new { T = builder.Target });
+        
         // add public property
-        builder.Advice.IntroduceProperty(builder.Target, "Instance", nameof(GetInstance), null, IntroductionScope.Static,
+        builder.Advice.IntroduceProperty(builder.Target, "Instance", nameof(GetInstance), null,
+            IntroductionScope.Static,
             OverrideStrategy.Override,
             pbuilder => pbuilder.Accessibility = Accessibility.Public,
-            args: new {T = builder.Target} );
+            args: new { T = builder.Target });
     }
 
     [Template]
-    private static T GetInstance<[CompileTime]T>()
+    private static T GetInstance<[CompileTime] T>()
     {
         return meta.ThisType._instance.Value;
+    }
+
+    [Template]
+    private static void CreateLazyInstance<[CompileTime] T>() where T : new()
+    {
+        meta.ThisType._instance = new Lazy<T>();
     }
 }
