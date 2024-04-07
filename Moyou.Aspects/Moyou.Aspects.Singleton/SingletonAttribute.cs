@@ -77,6 +77,6 @@ public class SingletonAttribute : TypeAspect
     [Template]
     private static void CreateLazyInstance<[CompileTime] T>() where T : new()
     {
-        meta.ThisType._instance = new Lazy<T>();
+        meta.ThisType._instance = new Lazy<T>(() => new T());
     }
 }
