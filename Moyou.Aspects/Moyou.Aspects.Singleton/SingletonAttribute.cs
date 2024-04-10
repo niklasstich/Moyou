@@ -12,6 +12,11 @@ namespace Moyou.Aspects.Singleton;
 public class SingletonAttribute : TypeAspect
 {
     /// <summary>
+    /// Whether or not the singleton should be lazy initialized.
+    /// </summary>
+    public bool Lazy { get; set; } = true;
+
+    /// <summary>
     /// MOYOU1101
     /// </summary>
     /// <remarks>
@@ -52,6 +57,12 @@ public class SingletonAttribute : TypeAspect
                 WarningHasAccessibleConstructors.WithArguments((builder.Target, constructorSignaturesString)));
         }
 
+        if (Lazy) GenerateLazyImplementation(builder);
+        else GenerateNonLazyImplementation(builder);
+    }
+
+    private void GenerateLazyImplementation(IAspectBuilder<INamedType> builder)
+    {
         var lazyGeneric = typeof(Lazy<>).MakeGenericType([builder.Target.ToType()]);
 
         // add private lazy field
@@ -59,8 +70,22 @@ public class SingletonAttribute : TypeAspect
             OverrideStrategy.Override);
         builder.Advice.AddInitializer(builder.Target, nameof(CreateLazyInstance), InitializerKind.BeforeTypeConstructor,
             args: new { T = builder.Target });
-        
+
         // add public property
+        builder.Advice.IntroduceProperty(builder.Target, "Instance", nameof(GetLazyInstance), null,
+            IntroductionScope.Static,
+            OverrideStrategy.Override,
+            pbuilder => pbuilder.Accessibility = Accessibility.Public,
+            args: new { T = builder.Target });
+    }
+
+    private void GenerateNonLazyImplementation(IAspectBuilder<INamedType> builder)
+    {
+        builder.Advice.IntroduceField(builder.Target, "_instance", builder.Target, IntroductionScope.Static,
+            OverrideStrategy.Override);
+        builder.Advice.AddInitializer(builder.Target, nameof(CreateInstance), InitializerKind.BeforeTypeConstructor,
+            args: new { T = builder.Target });
+
         builder.Advice.IntroduceProperty(builder.Target, "Instance", nameof(GetInstance), null,
             IntroductionScope.Static,
             OverrideStrategy.Override,
@@ -69,7 +94,7 @@ public class SingletonAttribute : TypeAspect
     }
 
     [Template]
-    private static T GetInstance<[CompileTime] T>()
+    private static T GetLazyInstance<[CompileTime] T>()
     {
         return meta.ThisType._instance.Value;
     }
@@ -78,5 +103,17 @@ public class SingletonAttribute : TypeAspect
     private static void CreateLazyInstance<[CompileTime] T>() where T : new()
     {
         meta.ThisType._instance = new Lazy<T>(() => new T());
+    }
+
+    [Template]
+    private static T GetInstance<[CompileTime] T>() where T : new()
+    {
+        return meta.ThisType._instance;
+    }
+
+    [Template]
+    private static void CreateInstance<[CompileTime] T>() where T : new()
+    {
+        meta.ThisType._instance = new T();
     }
 }
