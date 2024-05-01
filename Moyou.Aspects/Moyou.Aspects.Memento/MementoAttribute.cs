@@ -5,6 +5,7 @@ using Metalama.Framework.Eligibility;
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using Moyou.Diagnostics;
 using Moyou.Extensions;
 
 namespace Moyou.Aspects.Memento;
@@ -27,10 +28,19 @@ public class MementoAttribute : TypeAspect
     /// </remarks>
     public MementoMemberMode MemberMode { get; set; } = MementoMemberMode.All;
 
-    public static readonly DiagnosticDefinition<(IFieldOrProperty, INamedType, INamedType)> NonSupportedMemberInStrictMode =
-        new("MOYOU1001", Severity.Warning,
-            $$"""Member {0} of type {1} on type {2} is neither a value type nor implements ICloneable nor is a supported standard collection and {{nameof(MementoAttribute)}} is set to {{nameof(MementoStrictnessMode.Strict)}}. Please either implement ICloneable on type {1} or mark the member with the {{nameof(MementoIgnoreAttribute)}} and manage storing and restoring the state of the member manually in hook methods marked with the {{nameof(MementoCreateHookAttribute)}} and {{nameof(MementoRestoreHookAttribute)}} or alternatively mark {2}'s Memento attribute as {{nameof(MementoStrictnessMode.Loose)}} to apply value-type assigning semantics to all unsupported members."""
-            );
+    /// <summary>
+    /// MOYOU1001
+    /// </summary>
+    /// <remarks>
+    /// IFieldOrProperty should be the relevant member, first INamedType should be the type of the member,
+    /// second INamedType should be the target type.
+    /// </remarks>
+    private static readonly DiagnosticDefinition<(IFieldOrProperty, INamedType, INamedType)>
+        WarningNonSupportedMemberInStrictMode =
+            new(Warnings.Memento.NonSupportedMemberInStrictModeId, Severity.Warning,
+                Warnings.Memento.NonSupportedMemberInStrictModeMessageFormat,
+                Warnings.Memento.NonSupportedMemberInStrictModeTitle,
+                Warnings.Memento.NonSupportedMemberInStrictModeCategory);
 
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
@@ -46,7 +56,7 @@ public class MementoAttribute : TypeAspect
             foreach (var unsupportedType in membersWithUnsupportedTypes)
             {
                 builder.Diagnostics.Report(
-                    NonSupportedMemberInStrictMode.WithArguments((unsupportedType, (INamedType)unsupportedType.Type,
+                    WarningNonSupportedMemberInStrictMode.WithArguments((unsupportedType, (INamedType)unsupportedType.Type,
                         builder.Target)), unsupportedType);
             }
 
@@ -217,10 +227,6 @@ public class MementoAttribute : TypeAspect
             else if (sourceFieldOrProp.Type.Is(SpecialType.IEnumerable_T, ConversionKind.TypeDefinition))
             {
                 HandleIEnumerable(sourceFieldOrProp, targetFieldOrProp, builder);
-            }
-            else if (StrictnessMode == MementoStrictnessMode.Strict)
-            {
-                builder.Diagnostics.Report(NonSupportedMemberInStrictMode.WithArguments((sourceFieldOrProp, (INamedType)sourceFieldOrProp.Type, builder.Target)));
             }
             else
             {
