@@ -12,7 +12,7 @@ namespace Moyou.Aspects.Singleton;
 public class SingletonAttribute : TypeAspect
 {
     /// <summary>
-    /// Whether or not the singleton should be lazy initialized.
+    /// Whether the singleton should be lazy initialized.
     /// </summary>
     public bool Lazy { get; set; } = true;
 
@@ -81,11 +81,15 @@ public class SingletonAttribute : TypeAspect
 
     private void GenerateNonLazyImplementation(IAspectBuilder<INamedType> builder)
     {
+        //introduce private static instance field
         builder.Advice.IntroduceField(builder.Target, "_instance", builder.Target, IntroductionScope.Static,
-            OverrideStrategy.Override);
+            OverrideStrategy.Override,
+            fbuilder => fbuilder.Accessibility = Accessibility.Private);
+        //add initializer in static constructor (BeforeTypeConstructor)
         builder.Advice.AddInitializer(builder.Target, nameof(CreateInstance), InitializerKind.BeforeTypeConstructor,
             args: new { T = builder.Target });
 
+        //add public static property
         builder.Advice.IntroduceProperty(builder.Target, "Instance", nameof(GetInstance), null,
             IntroductionScope.Static,
             OverrideStrategy.Override,
