@@ -11,9 +11,17 @@ namespace Moyou.Aspects.Singleton;
 [AttributeUsage(AttributeTargets.Class)]
 public class SingletonAttribute : TypeAspect
 {
+    // ReSharper disable once GrammarMistakeInComment
     /// <summary>
     /// Whether the singleton should be lazy initialized.
     /// </summary>
+    /// <remarks>
+    /// If true, the singleton will be wrapped inside a <see cref="Lazy{T}"/> instance and be initialized when you first
+    /// access the instance.
+    /// If false, the singleton will be initialized when the types static constructor is first called (see
+    /// https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-constructors for
+    /// more information).
+    /// </remarks>
     public bool Lazy { get; set; } = true;
 
     /// <summary>
@@ -41,24 +49,43 @@ public class SingletonAttribute : TypeAspect
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         base.BuildAspect(builder);
+        
+        /*
+        var implicitPublicConstructor = builder.Target.Constructors.SingleOrDefault(constructor =>
+            constructor is { Accessibility: Accessibility.Public, IsImplicitlyDeclared: true, Parameters.Count: 0 });
+
+        if (implicitPublicConstructor != null)
+        {
+            //TODO: if implicit public constructor exists, override it with a private constructor
+            //TODO: only possible after feature of defining own constructors becomes available in Metalama 2024.2
+        }
+        */
+
+
 
         // warning if there are any non-private constructors
         if (builder.Target.Constructors.Any(constructor => constructor.Accessibility != Accessibility.Private))
         {
-            var constructorSignatures = builder.Target.Constructors
-                .Where(constructor => constructor.Accessibility != Accessibility.Private)
-                .Select(constructor => constructor.Parameters)
-                .Select(parameters => parameters.Select(parameter => parameter.Type.ToDisplayString()))
-                .Select(stringList => string.Join(",", stringList))
-                .Select(str => string.IsNullOrWhiteSpace(str) ? "void" : str)
-                .Select(str => $"({str})");
-            var constructorSignaturesString = string.Join(", ", constructorSignatures);
+            var constructorSignaturesString = CollectConstructorSignaturesAsString(builder);
             builder.Diagnostics.Report(
                 WarningHasAccessibleConstructors.WithArguments((builder.Target, constructorSignaturesString)));
         }
 
         if (Lazy) GenerateLazyImplementation(builder);
         else GenerateNonLazyImplementation(builder);
+    }
+
+    private static string CollectConstructorSignaturesAsString(IAspectBuilder<INamedType> builder)
+    {
+        var constructorSignatures = builder.Target.Constructors
+            .Where(constructor => constructor.Accessibility != Accessibility.Private)
+            .Select(constructor => constructor.Parameters)
+            .Select(parameters => parameters.Select(parameter => parameter.Type.ToDisplayString()))
+            .Select(stringList => string.Join(",", stringList))
+            .Select(str => string.IsNullOrWhiteSpace(str) ? "void" : str)
+            .Select(str => $"({str})");
+        var constructorSignaturesString = string.Join(", ", constructorSignatures);
+        return constructorSignaturesString;
     }
 
     private void GenerateLazyImplementation(IAspectBuilder<INamedType> builder)
