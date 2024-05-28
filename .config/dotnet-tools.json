@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "metalama.tool": {
+      "version": "2024.1.19",
+      "commands": [
+        "metalama"
+      ]
+    }
+  }
+}
