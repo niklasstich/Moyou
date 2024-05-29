@@ -27,7 +27,6 @@ jobs:
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: ${{ matrix.dotnet-version }}
-                  cache: true
             - run: dotnet restore
             - run: dotnet build --configuration Release --no-restore
             - run: dotnet test --configuration Release --no-restore --no-build
