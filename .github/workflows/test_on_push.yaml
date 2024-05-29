@@ -18,8 +18,6 @@ jobs:
                 dotnet-version: ['8.x']
         runs-on: ${{ matrix.os }}
         name: Build and Test on ${{ matrix.os }} with .NET Core ${{ matrix.dotnet-version }}
-        env:
-            NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
         steps:
             - uses: actions/checkout@v4
@@ -30,5 +28,3 @@ jobs:
             - run: dotnet restore
             - run: dotnet build --configuration Release --no-restore
             - run: dotnet test --configuration Release --no-restore --no-build
-  
-  
