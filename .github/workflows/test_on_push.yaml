@@ -13,23 +13,19 @@ on:
 jobs:
     build-and-test:
         strategy:
+            fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest, macos-latest]
                 dotnet-version: ['8.x']
         runs-on: ${{ matrix.os }}
         name: Build and Test on ${{ matrix.os }} with .NET Core ${{ matrix.dotnet-version }}
-        env:
-            NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - name: Setup .NET Core
-              uses: actions/setup-dotnet@v1
+              uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: ${{ matrix.dotnet-version }}
-                  cache: true
-            - run: dotnet restore --locked-mode
-            - run: dotnet build --configuration Release --no-restore
-            - run: dotnet test --configuration Release --no-restore --no-build
-  
-  
+            - run: dotnet restore
+#            - run: dotnet build --configuration Debug --no-restore
+            - run: dotnet test --configuration Release --no-restore
