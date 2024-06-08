@@ -69,7 +69,3 @@ jobs:
     # Test
     - name: Execute tests
       run: dotnet test
-
-    # Run
-    - name: Execute app
-      run: dotnet run
