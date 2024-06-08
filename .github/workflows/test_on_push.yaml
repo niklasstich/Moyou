@@ -27,5 +27,5 @@ jobs:
               with:
                   dotnet-version: ${{ matrix.dotnet-version }}
             - run: dotnet restore
-            - run: dotnet build --configuration Debug --no-restore
-            - run: dotnet test --configuration Debug --no-restore --no-build
+#            - run: dotnet build --configuration Debug --no-restore
+            - run: dotnet test --configuration Release --no-restore
