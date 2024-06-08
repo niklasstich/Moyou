@@ -7,8 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Metalama.Framework" Version="2024.2.6-preview" />
-      <PackageReference Include="Metalama.Framework.Redist" Version="2024.2.6-preview" />
+      <PackageReference Include="Metalama.Framework" Version="2024.2.8-preview" />
+      <PackageReference Include="Metalama.Framework.Redist" Version="2024.2.8-preview" />
     </ItemGroup>
 
 </Project>
