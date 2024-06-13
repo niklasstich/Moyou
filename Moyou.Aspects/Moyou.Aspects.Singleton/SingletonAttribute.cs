@@ -31,11 +31,23 @@ public class SingletonAttribute : TypeAspect
     /// INamedType should be the relevant type, string should be a comma separated list of violating constructor
     /// signatures.
     /// </remarks>
-    private static readonly DiagnosticDefinition<(INamedType, string)> WarningHasAccessibleConstructors =
-        new(Warnings.Singleton.HasAccessibleConstructorsId, Severity.Warning,
-            Warnings.Singleton.HasAccessibleConstructorsMessageFormat,
-            Warnings.Singleton.HasAccessibleConstructorsTitle,
-            Warnings.Singleton.HasAccessibleConstructorsCategory);
+    private static readonly DiagnosticDefinition<(INamedType, string)> WarningHasAccessibleConstructor =
+        new(Warnings.Singleton.HasAccessibleConstructorId, Severity.Warning,
+            Warnings.Singleton.HasAccessibleConstructorMessageFormat,
+            Warnings.Singleton.HasAccessibleConstructorTitle,
+            Warnings.Singleton.HasAccessibleConstructorCategory);
+    
+    /// <summary>
+    /// MOYOU1102
+    /// </summary>
+    /// <remarks>
+    /// INamedType should be the relevant type
+    /// </remarks>
+    private static readonly DiagnosticDefinition<INamedType> WarningHasImplicitPublicConstructor =
+        new(Warnings.Singleton.HasImplicitPublicConstructorId, Severity.Warning,
+            Warnings.Singleton.HasImplicitPublicConstructorMessageFormat,
+            Warnings.Singleton.HasImplicitPublicConstructorTitle,
+            Warnings.Singleton.HasImplicitPublicConstructorCategory);
 
     public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
     {
@@ -64,28 +76,36 @@ public class SingletonAttribute : TypeAspect
 
 
         // warning if there are any non-private constructors
-        if (builder.Target.Constructors.Any(constructor => constructor.Accessibility != Accessibility.Private))
+        var constructors = builder.Target.Constructors.ToList();
+        var first = constructors.First();
+        if (constructors.Count == 1 && first is { IsImplicitlyDeclared: true, Parameters.Count: 0, Accessibility: Accessibility.Public })
         {
-            var constructorSignaturesString = CollectConstructorSignaturesAsString(builder);
-            builder.Diagnostics.Report(
-                WarningHasAccessibleConstructors.WithArguments((builder.Target, constructorSignaturesString)));
+            ReportImplicitConstructor(builder);
+        }
+        else
+        {
+            foreach (var constructor in constructors.Where(constructor => constructor.Accessibility != Accessibility.Private))
+            {
+                ReportPublicConstructor(builder, constructor);
+            }
         }
 
         if (Lazy) GenerateLazyImplementation(builder);
         else GenerateNonLazyImplementation(builder);
     }
 
-    private static string CollectConstructorSignaturesAsString(IAspectBuilder<INamedType> builder)
+    private static void ReportImplicitConstructor(IAspectBuilder<INamedType> builder)
     {
-        var constructorSignatures = builder.Target.Constructors
-            .Where(constructor => constructor.Accessibility != Accessibility.Private)
-            .Select(constructor => constructor.Parameters)
-            .Select(parameters => parameters.Select(parameter => parameter.Type.ToDisplayString()))
-            .Select(stringList => string.Join(",", stringList))
-            .Select(str => string.IsNullOrWhiteSpace(str) ? "void" : str)
-            .Select(str => $"({str})");
-        var constructorSignaturesString = string.Join(", ", constructorSignatures);
-        return constructorSignaturesString;
+        //special warning for implicit constructor
+        builder.Diagnostics.Report(WarningHasImplicitPublicConstructor.WithArguments(builder.Target), builder.Target);
+    }
+
+    private static void ReportPublicConstructor(IAspectBuilder<INamedType> builder, IConstructor constructor)
+    {
+        var typeSignature = string.Join(", ", constructor.Parameters.Select(param => $"{param.Type.ToDisplayString()} {param.Name}"));
+        var signatureString = $"({typeSignature})";
+        builder.Diagnostics.Report(WarningHasAccessibleConstructor.WithArguments((builder.Target, signatureString)),
+            constructor);
     }
 
     private void GenerateLazyImplementation(IAspectBuilder<INamedType> builder)

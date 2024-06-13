@@ -15,5 +15,10 @@ public class HasPublicConstructors
         A = a;
     }
 
+    public HasPublicConstructors(int a, float b)
+    {
+        
+    }
+
     public int A { get; set; }
 }
