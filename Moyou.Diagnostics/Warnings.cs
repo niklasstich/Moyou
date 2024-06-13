@@ -46,7 +46,7 @@ public static class Warnings
         public static string HasImplicitPublicConstructorId => "MOYOU1102";
 
         public static string HasImplicitPublicConstructorMessageFormat =>
-            "Singleton class {0} shouldn't have an implicit public constructor. Consider defining your own private " +
+            "Singleton class {0} should have no implicit public constructor. Consider defining your own private " +
             "constructor to override the implicit public constructor.";
 
         public static string? HasImplicitPublicConstructorTitle =>

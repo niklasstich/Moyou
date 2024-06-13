@@ -1,4 +1,4 @@
-// Warning MOYOU1102 on `HasImplicitPublicConstructor`: `Singleton class HasImplicitPublicConstructor shouldn't have an implicit public constructor. Consider defining your own private constructor to override the implicit public constructor.`
+// Warning MOYOU1102 on `HasImplicitPublicConstructor`: `Singleton class HasImplicitPublicConstructor should have no implicit public constructor. Consider defining your own private constructor to override the implicit public constructor.`
 using Moyou.Aspects.Singleton;
 namespace Moyou.CompileTimeTest.Singleton.SingletonAttributeTests;
 [Singleton]
