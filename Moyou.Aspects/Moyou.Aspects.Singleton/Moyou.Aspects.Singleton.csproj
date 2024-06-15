@@ -7,12 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Metalama.Framework.Redist" Version="2024.2.8-preview" />
+      <ProjectReference Include="..\..\Moyou.Diagnostics\Moyou.Diagnostics.csproj" />
+      <ProjectReference Include="..\..\Moyou.Extensions\Moyou.Extensions.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Moyou.Diagnostics\Moyou.Diagnostics.csproj" />
-      <ProjectReference Include="..\..\Moyou.Extensions\Moyou.Extensions.csproj" />
+      <PackageReference Include="Metalama.Framework" Version="2024.2.9-preview" />
     </ItemGroup>
 
 </Project>
