@@ -38,11 +38,19 @@ public static class Warnings
     {
         // MOYOU1101: Singleton class {0} should have no accessible constructors.
         // Found constructors with signatures: {1}
-        public static string HasAccessibleConstructorsId => "MOYOU1101";
-        public static string HasAccessibleConstructorsMessageFormat =>
-            "Singleton class {0} should have no accessible constructors. Found constructors with signatures: {1}";
-        public static string HasAccessibleConstructorsTitle => "Singleton class should have no accessible constructors";
-        public static string HasAccessibleConstructorsCategory => "Singleton";
-        
+        public static string HasAccessibleConstructorId => "MOYOU1101";
+        public static string HasAccessibleConstructorMessageFormat =>
+            "Singleton class {0} should have no accessible constructors. Found constructor with signature: {1}.";
+        public static string HasAccessibleConstructorTitle => "Singleton class should have no accessible constructors";
+        public static string HasAccessibleConstructorCategory => "Singleton";
+        public static string HasImplicitPublicConstructorId => "MOYOU1102";
+
+        public static string HasImplicitPublicConstructorMessageFormat =>
+            "Singleton class {0} should have no implicit public constructor. Consider defining your own private " +
+            "constructor to override the implicit public constructor.";
+
+        public static string? HasImplicitPublicConstructorTitle =>
+            "Singleton class should have no implicit public constructor";
+        public static string? HasImplicitPublicConstructorCategory => "Singleton";
     }
 }

@@ -27,5 +27,5 @@ jobs:
               with:
                   dotnet-version: ${{ matrix.dotnet-version }}
             - run: dotnet restore
-#            - run: dotnet build --configuration Debug --no-restore
+#            - run: dotnet build --configuration Debug --no-restore # TODO: breaks Metalama in 2024.2.8-preview, reintroduce after fixed
             - run: dotnet test --configuration Release --no-restore

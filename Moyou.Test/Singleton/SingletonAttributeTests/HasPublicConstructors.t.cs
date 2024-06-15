@@ -1,4 +1,5 @@
-// Warning MOYOU1101 on `HasPublicConstructors`: `Singleton class HasPublicConstructors should have no accessible constructors. Found constructors with signatures: (int)`
+// Warning MOYOU1101 on `HasPublicConstructors`: `Singleton class HasPublicConstructors should have no accessible constructors. Found constructor with signature: (int a).`
+// Warning MOYOU1101 on `HasPublicConstructors`: `Singleton class HasPublicConstructors should have no accessible constructors. Found constructor with signature: (int a, float b).`
 using Moyou.Aspects.Singleton;
 namespace Moyou.CompileTimeTest.Singleton.SingletonAttributeTests;
 [Singleton]
@@ -11,6 +12,9 @@ public class HasPublicConstructors
   public HasPublicConstructors(int a)
   {
     A = a;
+  }
+  public HasPublicConstructors(int a, float b)
+  {
   }
   public int A { get; set; }
   private static global::System.Lazy<global::Moyou.CompileTimeTest.Singleton.SingletonAttributeTests.HasPublicConstructors> _instance;
