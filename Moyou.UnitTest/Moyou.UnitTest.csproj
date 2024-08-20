@@ -28,4 +28,8 @@
     <ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.Singleton\Moyou.Aspects.Singleton.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Factory\" />
+  </ItemGroup>
+
 </Project>
