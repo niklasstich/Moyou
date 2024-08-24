@@ -27,25 +27,34 @@ public class NestedNullable : global::Moyou.Aspects.UnsavedChanges.IUnsavedChang
     this._internalUnsavedChanges = false;
     this.C.ResetUnsavedChanges();
     this.CNullable?.ResetUnsavedChanges();
-    foreach (var value in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.CNotNullableEnumerable)
+    foreach (var val in this.CNotNullableEnumerable)
     {
-      value.ResetUnsavedChanges();
+      val.ResetUnsavedChanges();
     }
-    foreach (var value_1 in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.CNotNullableEnumerableNullableT)
+    foreach (var val_1 in this.CNotNullableEnumerableNullableT)
     {
-      value_1.ResetUnsavedChanges();
+      val_1?.ResetUnsavedChanges();
     }
-    foreach (var value_2 in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.CNullableEnumerable)
+    if (this.CNullableEnumerable is not null)
     {
-      value_2.ResetUnsavedChanges();
+      foreach (var val_2 in this.CNullableEnumerable!)
+      {
+        val_2.ResetUnsavedChanges();
+      }
     }
-    foreach (var value_3 in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.CNullableEnumerableNullableT)
+    if (this.CNullableEnumerableNullableT is not null)
     {
-      value_3.ResetUnsavedChanges();
+      foreach (var val_3 in this.CNullableEnumerableNullableT!)
+      {
+        val_3?.ResetUnsavedChanges();
+      }
     }
-    foreach (var value_4 in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.CNullableList)
+    if (this.CNullableList is not null)
     {
-      value_4.ResetUnsavedChanges();
+      foreach (var val_4 in this.CNullableList!)
+      {
+        val_4.ResetUnsavedChanges();
+      }
     }
   }
 }

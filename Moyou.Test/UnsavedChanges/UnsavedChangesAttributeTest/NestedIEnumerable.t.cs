@@ -19,9 +19,9 @@ public class NestedIEnumerable : global::Moyou.Aspects.UnsavedChanges.IUnsavedCh
   public void ResetUnsavedChanges()
   {
     this._internalUnsavedChanges = false;
-    foreach (var value in (global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.Bs)
+    foreach (var val in this.Bs)
     {
-      value.ResetUnsavedChanges();
+      val.ResetUnsavedChanges();
     }
   }
 }

@@ -127,18 +127,60 @@ public class UnsavedChangesAttribute : TypeAspect
 
         foreach (var member in relevantIEnumerableMembers)
         {
-            // if(member.Value is null) continue;
-            foreach (var value in (IEnumerable<IUnsavedChanges>)member.Value)
+            var enumerableNullable = meta.CompileTime(member.Type.IsNullable!.Value);
+            var genericTypeNullable = meta.CompileTime((INamedType)member.Type).TypeArguments[0].IsNullable!.Value;
+            ResetUnsavedChangesHandleIEnumerable(enumerableNullable, genericTypeNullable, member);
+            // if (((INamedType)member.Type).TypeArguments[0].IsNullable!.Value)
+            // {
+            // }
+            // else
+            // {
+            //     foreach (var value in (IEnumerable<IUnsavedChanges>)member.Value)
+            //     {
+            //         value.ResetUnsavedChanges();
+            //     }
+            // }
+        }
+    }
+
+    [Template]
+    private void ResetUnsavedChangesHandleIEnumerable(
+        [CompileTime] bool enumerableNullable,
+        [CompileTime] bool genericTypeNullable,
+        [CompileTime] IFieldOrProperty member
+    )
+    {
+        if (enumerableNullable)
+        {
+            // ReSharper disable once InvertIf
+            // limitation: https://doc.postsharp.net/metalama/conceptual/aspects/templates/auxilliary-templates see note
+            if (member.Value is not null)
             {
-                value.ResetUnsavedChanges();
+                ResetUnsavedChangesHandleIEnumerableInternal(genericTypeNullable, member);
+            }
+        }
+        else
+        {
+            ResetUnsavedChangesHandleIEnumerableInternal(genericTypeNullable, member);
+        }
+    }
+
+    [Template]
+    private void ResetUnsavedChangesHandleIEnumerableInternal([CompileTime]bool genericTypeNullable, [CompileTime]IFieldOrProperty member)
+    {
+        if (genericTypeNullable)
+        {
+            foreach (var val in member.Value!)
+            {
+                val?.ResetUnsavedChanges();
+            }
+        }
+        else
+        {
+            foreach (var val in member.Value!)
+            {
+                val.ResetUnsavedChanges();
             }
         }
     }
-}
-
-[RunTimeOrCompileTime]
-public interface IUnsavedChanges
-{
-    bool UnsavedChanges { get; }
-    void ResetUnsavedChanges();
 }
