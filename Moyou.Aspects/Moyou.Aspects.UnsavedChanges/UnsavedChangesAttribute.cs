@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Metalama.Framework.Advising;
+﻿using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -7,7 +6,15 @@ using Moyou.Extensions;
 
 namespace Moyou.Aspects.UnsavedChanges;
 
-//TODO: refactor
+/// <summary>
+/// Implements a bubbling-up unsaved changes field and a method to reset via <see cref="IUnsavedChanges"/>.
+/// All members in a type marked with this attribute that are either themselves marked with this attribute or are an
+/// IEnumerable of a type marked with this attribute will be considered for <see cref="GetUnsavedChanges"/> and
+/// <see cref="ResetUnsavedChanges"/>.
+/// </summary>
+/// <remarks>You must still determine yourself when the object itself has unsaved changes and set
+/// <see cref="_internalUnsavedChanges"/> yourself accordingly (for example, in your property setters).</remarks>
+/// <seealso cref="IUnsavedChanges"/>
 public class UnsavedChangesAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
@@ -50,16 +57,19 @@ public class UnsavedChangesAttribute : TypeAspect
             buildProperty: pBuilder => { pBuilder.Accessibility = Accessibility.Public; });
     }
 
+    /// <summary>
+    /// Whether this object itself has unsaved changes (regardless of child members).
+    /// </summary>
     [Template] private bool _internalUnsavedChanges = false;
+
     [Template] public bool UnsavedChanges => meta.This.GetUnsavedChanges();
 
     [Template]
-    private bool GetUnsavedChanges(
+    private static bool GetUnsavedChanges(
         [CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
         [CompileTime] IEnumerable<IFieldOrProperty> relevantIEnumerableMembers
     )
     {
-        meta.DebugBreak();
         var exprBuilder = new ExpressionBuilder();
         exprBuilder.AppendExpression(meta.This._internalUnsavedChanges);
         foreach (var member in relevantMembers)
@@ -84,7 +94,7 @@ public class UnsavedChangesAttribute : TypeAspect
     }
 
     /// <summary>
-    /// 
+    /// Handles code generation for IEnumerable members for <see cref="GetUnsavedChanges"/>.
     /// </summary>
     /// <param name="enumerableNullable">The IEnumerable itself is nullable, i.e. <c>IEnumerable&lt;Foobar&gt;?</c>.</param>
     /// <param name="genericTypeNullable">The type inside the IEnumerable is nullable, i.e. <c>IEnumerable&lt;Foobar?&gt;</c>.</param>
@@ -114,7 +124,7 @@ public class UnsavedChangesAttribute : TypeAspect
     }
 
     [Template]
-    public void ResetUnsavedChanges(
+    public static void ResetUnsavedChanges(
         [CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
         [CompileTime] IEnumerable<IFieldOrProperty> relevantIEnumerableMembers
     )
@@ -130,21 +140,17 @@ public class UnsavedChangesAttribute : TypeAspect
             var enumerableNullable = meta.CompileTime(member.Type.IsNullable!.Value);
             var genericTypeNullable = meta.CompileTime((INamedType)member.Type).TypeArguments[0].IsNullable!.Value;
             ResetUnsavedChangesHandleIEnumerable(enumerableNullable, genericTypeNullable, member);
-            // if (((INamedType)member.Type).TypeArguments[0].IsNullable!.Value)
-            // {
-            // }
-            // else
-            // {
-            //     foreach (var value in (IEnumerable<IUnsavedChanges>)member.Value)
-            //     {
-            //         value.ResetUnsavedChanges();
-            //     }
-            // }
         }
     }
 
+    /// <summary>
+    /// Handles code generation for IEnumerable members for <see cref="ResetUnsavedChanges"/>.
+    /// </summary>
+    /// <param name="enumerableNullable">The IEnumerable itself is nullable, i.e. <c>IEnumerable&lt;Foobar&gt;?</c>.</param>
+    /// <param name="genericTypeNullable">The type inside the IEnumerable is nullable, i.e. <c>IEnumerable&lt;Foobar?&gt;</c>.</param>
+    /// <param name="member">The member itself.</param>
     [Template]
-    private void ResetUnsavedChangesHandleIEnumerable(
+    private static void ResetUnsavedChangesHandleIEnumerable(
         [CompileTime] bool enumerableNullable,
         [CompileTime] bool genericTypeNullable,
         [CompileTime] IFieldOrProperty member
@@ -165,8 +171,14 @@ public class UnsavedChangesAttribute : TypeAspect
         }
     }
 
+    /// <summary>
+    /// Helper method for <see cref="ResetUnsavedChangesHandleIEnumerable"/>.
+    /// </summary>
+    /// <param name="genericTypeNullable">The type inside the IEnumerable is nullable, i.e. <c>IEnumerable&lt;Foobar?&gt;</c>.</param>
+    /// <param name="member">The member itself.</param>
     [Template]
-    private void ResetUnsavedChangesHandleIEnumerableInternal([CompileTime]bool genericTypeNullable, [CompileTime]IFieldOrProperty member)
+    private static void ResetUnsavedChangesHandleIEnumerableInternal([CompileTime] bool genericTypeNullable,
+        [CompileTime] IFieldOrProperty member)
     {
         if (genericTypeNullable)
         {
