@@ -14,7 +14,7 @@ public class NestedIEnumerable : global::Moyou.Aspects.UnsavedChanges.IUnsavedCh
   }
   private global::System.Boolean GetUnsavedChanges()
   {
-    return (global::System.Boolean)(this._internalUnsavedChanges || global::System.Linq.Enumerable.Any(((global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.Bs), val => val.UnsavedChanges));
+    return (global::System.Boolean)(this._internalUnsavedChanges || global::System.Linq.Enumerable.Any(((global::System.Collections.Generic.IEnumerable<global::Moyou.Aspects.UnsavedChanges.IUnsavedChanges>)this.Bs), v_1 => v_1.UnsavedChanges));
   }
   public void ResetUnsavedChanges()
   {

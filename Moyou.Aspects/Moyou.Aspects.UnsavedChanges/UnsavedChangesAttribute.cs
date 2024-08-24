@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Advising;
+﻿using System.Diagnostics;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
@@ -58,21 +59,58 @@ public class UnsavedChangesAttribute : TypeAspect
         [CompileTime] IEnumerable<IFieldOrProperty> relevantIEnumerableMembers
     )
     {
+        meta.DebugBreak();
         var exprBuilder = new ExpressionBuilder();
         exprBuilder.AppendExpression(meta.This._internalUnsavedChanges);
         foreach (var member in relevantMembers)
         {
             exprBuilder.AppendVerbatim("||");
-            exprBuilder.AppendExpression(member.Value.UnsavedChanges);
+            if (member.Type.IsNullable!.Value)
+                // ReSharper disable once ArrangeRedundantParentheses because we need the parantheses in the expression
+                exprBuilder.AppendExpression((member.Value?.UnsavedChanges ?? false));
+            else
+                exprBuilder.AppendExpression(member.Value?.UnsavedChanges);
         }
 
         foreach (var member in relevantIEnumerableMembers)
         {
             exprBuilder.AppendVerbatim("||");
-            exprBuilder.AppendExpression(((IEnumerable<IUnsavedChanges>)member.Value).Any(val => val.UnsavedChanges));
+            var enumerableNullable = meta.CompileTime(member.Type.IsNullable!.Value);
+            var genericTypeNullable = meta.CompileTime((INamedType)member.Type).TypeArguments[0].IsNullable!.Value;
+            GetUnsavedChangesHandleIEnumerable(enumerableNullable, genericTypeNullable, member, exprBuilder);
         }
 
         return exprBuilder.ToExpression().Value;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="enumerableNullable">The IEnumerable itself is nullable, i.e. <c>IEnumerable&lt;Foobar&gt;?</c>.</param>
+    /// <param name="genericTypeNullable">The type inside the IEnumerable is nullable, i.e. <c>IEnumerable&lt;Foobar?&gt;</c>.</param>
+    /// <param name="member">The member itself.</param>
+    /// <param name="exprBuilder">The current expression builder.</param>
+    [Template]
+    private static void GetUnsavedChangesHandleIEnumerable(
+        [CompileTime] bool enumerableNullable,
+        [CompileTime] bool genericTypeNullable,
+        [CompileTime] IFieldOrProperty member,
+        [CompileTime] ExpressionBuilder exprBuilder
+    )
+    {
+        if (enumerableNullable)
+        {
+            //TODO: maybe un-verbatim-ify this?
+            exprBuilder.AppendVerbatim(genericTypeNullable
+                ? $"{member.Name} is null ? false : {member.Name}.Any(v => v?.UnsavedChanges ?? false)"
+                : $"{member.Name} is null ? false : {member.Name}.Any(v => v.UnsavedChanges)");
+        }
+        else
+        {
+            exprBuilder.AppendExpression(genericTypeNullable
+                ? ((IEnumerable<IUnsavedChanges?>)member.Value!).Any(v => v?.UnsavedChanges ?? false)
+                : ((IEnumerable<IUnsavedChanges>)member.Value!).Any(v => v.UnsavedChanges));
+        }
     }
 
     [Template]
@@ -84,11 +122,12 @@ public class UnsavedChangesAttribute : TypeAspect
         meta.This._internalUnsavedChanges = false;
         foreach (var member in relevantMembers)
         {
-            member.Value.ResetUnsavedChanges();
+            member.Value?.ResetUnsavedChanges();
         }
 
         foreach (var member in relevantIEnumerableMembers)
         {
+            // if(member.Value is null) continue;
             foreach (var value in (IEnumerable<IUnsavedChanges>)member.Value)
             {
                 value.ResetUnsavedChanges();
