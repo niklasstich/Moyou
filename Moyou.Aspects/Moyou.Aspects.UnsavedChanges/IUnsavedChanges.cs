@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Moyou.Aspects.UnsavedChanges;
 
-[RunTimeOrCompileTime]
+[RunTime]
 public interface IUnsavedChanges
 {
     /// <summary>

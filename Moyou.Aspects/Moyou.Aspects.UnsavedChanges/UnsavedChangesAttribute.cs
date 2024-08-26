@@ -112,8 +112,8 @@ public class UnsavedChangesAttribute : TypeAspect
         {
             //TODO: maybe un-verbatim-ify this?
             exprBuilder.AppendVerbatim(genericTypeNullable
-                ? $"{member.Name} is null ? false : {member.Name}.Any(v => v?.UnsavedChanges ?? false)"
-                : $"{member.Name} is null ? false : {member.Name}.Any(v => v.UnsavedChanges)");
+                ? $"({member.Name} is null ? false : {member.Name}.Any(v => v?.UnsavedChanges ?? false))"
+                : $"({member.Name} is null ? false : {member.Name}.Any(v => v.UnsavedChanges))");
         }
         else
         {
