@@ -33,12 +33,6 @@ public interface IWindow
 
 public class WindowsButton : IButton
 {
-    public WindowsButton(string text)
-    {
-        Text = text;
-    }
-    
-    public string Text { get; set; }
 }
 
 public class WindowsWindow : IWindow
@@ -48,20 +42,6 @@ public class WindowsWindow : IWindow
 
 public class MacButton : IButton
 {
-    public MacButton(string text)
-    {
-        Text = text;
-    }
-    private string _text;
-
-    public string Text
-    {
-        get => _text;
-        set {
-            // OS call
-            _text = value;
-        }
-    }
 }
 
 public class MacWindow : IWindow
