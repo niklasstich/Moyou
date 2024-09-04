@@ -8,7 +8,9 @@ public interface AbstractUIFactory
     IButton CreateButton();
 }
 
-// [Factory(AbstractFactoryType = typeof(AbstractUIFactory))]
+[Factory(AbstractFactoryType = typeof(AbstractUIFactory))]
+[FactoryMember(TargetType = typeof(WindowsButton))]
+[FactoryMember(TargetType = typeof(WindowsWindow))]
 public class WindowsUIFactory
 {
 
@@ -37,7 +39,16 @@ public class WindowsButton : IButton
 
 public class WindowsWindow : IWindow
 {
-    
+    private WindowsWindow()
+    {
+        
+    }
+
+    [FactoryConstructor]
+    public WindowsWindow(WindowsButton button)
+    {
+        
+    }
 }
 
 public class MacButton : IButton

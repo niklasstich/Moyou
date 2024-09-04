@@ -4,6 +4,8 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Diagnostics;
+using Moyou.Diagnostics;
 using Moyou.Extensions;
 
 namespace Moyou.Aspects.Factory;
@@ -12,8 +14,18 @@ namespace Moyou.Aspects.Factory;
 public class FactoryAttribute : TypeAspect
 {
     public Type? AbstractFactoryType { get; set; }
-    public Type[] FactoryMembers { get; set; }
-    private INamedType? _abstractFactoryType;
+
+    private static readonly DiagnosticDefinition<INamedType> ErrorNoSuitableConstructor =
+        new(Errors.Factory.NoSuitableConstructorId, Severity.Error,
+            Errors.Factory.NoSuitableConstructorMessageFormat,
+            Errors.Factory.NoSuitableConstructorTitle,
+            Errors.Factory.NoSuitableConstructorCategory);
+
+    private static readonly DiagnosticDefinition<INamedType> ErrorMultipleMarkedConstructors =
+        new(Errors.Factory.MultipleMarkedConstructorsId, Severity.Error,
+            Errors.Factory.MultipleMarkedConstructorsMessageFormat,
+            Errors.Factory.MultipleMarkedConstructorTitle,
+            Errors.Factory.MultipleMarkedConstructorCategory);
 
     [SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly")] //property is argument
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
@@ -37,56 +49,80 @@ public class FactoryAttribute : TypeAspect
         var trimmedInterfaceName = primaryInterface.Name.StartsWith("I")
             ? primaryInterface.Name[1..]
             : primaryInterface.Name;
-        if (memberType.HasDefaultConstructor)
+        if (memberType.HasPublicDefaultConstructor())
         {
             builder.IntroduceMethod(nameof(CreateTemplateDefaultConstructor), IntroductionScope.Instance,
-                buildMethod: builder =>
+                buildMethod: methodBuilder =>
                 {
                     //drop the leading 'I' from the interface in the method name
-                    builder.Name = $"Create{trimmedInterfaceName}";
-                    builder.Accessibility = Accessibility.Public;
+                    methodBuilder.Name = $"Create{trimmedInterfaceName}";
+                    methodBuilder.Accessibility = Accessibility.Public;
                 }, args: new { TInterface = primaryInterface, memberType });
         }
         else
         {
-            IConstructor constructor;
-            if (memberType.Constructors.Count == 1)
-            {
-                constructor = memberType.Constructors.Single();
-            }
-            else
-            {
-                //dont know what constructor to use, panic
-                //TODO: check for [FactoryMemberConstructor] and proper error diagnostic
-                throw new NotImplementedException();
-            }
-
-            builder.IntroduceMethod(nameof(CreateTemplate), IntroductionScope.Instance, buildMethod: builder =>
-            {
-                // Debugger.Break();
-                builder.Name = $"Create{trimmedInterfaceName}";
-                builder.Accessibility = Accessibility.Public;
-                //add all constructor parameters to factory method
-                foreach (var constructorParameter in constructor.Parameters)
-                {
-                    builder.AddParameter(constructorParameter.Name, constructorParameter.Type);
-                }
-            }, args: new { TInterface = primaryInterface, memberType, constructor });
+            HandleNonDefaultConstructor(builder, memberType, trimmedInterfaceName, primaryInterface);
         }
     }
 
-    [Template]
-    public TInterface CreateTemplateDefaultConstructor<[CompileTime] TInterface>([CompileTime] INamedType memberType)
+    private static void HandleNonDefaultConstructor(IAspectBuilder<INamedType> builder, INamedType memberType,
+        string trimmedInterfaceName, INamedType primaryInterface)
     {
-        var constructor = meta.CompileTime(memberType.Constructors.GetDefaultConstructor());
-        return constructor.Invoke();
+        IConstructor? constructor;
+        if (memberType.Constructors.Count == 1)
+        {
+            constructor = memberType.Constructors.Single();
+        }
+        else
+        {
+            try
+            {
+                constructor =
+                    memberType.Constructors.SingleOrDefault(ctor => ctor.HasAttribute<FactoryConstructorAttribute>());
+            }
+            catch (InvalidOperationException iox)
+            {
+                //only one constructor with attribute allowed
+                foreach (var markedCtor in memberType.Constructors.Where(ctor => ctor.HasAttribute<FactoryConstructorAttribute>()))
+                {
+                    builder.Diagnostics.Report(ErrorMultipleMarkedConstructors.WithArguments(memberType), markedCtor);
+                }
+
+                return;
+            }
+        }
+
+        if (constructor == null)
+        {
+            //no constructor is marked
+            builder.Diagnostics.Report(ErrorNoSuitableConstructor.WithArguments(memberType), memberType);
+            return;
+        }
+
+        builder.IntroduceMethod(nameof(CreateTemplate), IntroductionScope.Instance, buildMethod: builder =>
+        {
+            // Debugger.Break();
+            builder.Name = $"Create{trimmedInterfaceName}";
+            builder.Accessibility = Accessibility.Public;
+            //add all constructor parameters to factory method
+            foreach (var constructorParameter in constructor.Parameters)
+            {
+                builder.AddParameter(constructorParameter.Name, constructorParameter.Type);
+            }
+        }, args: new { TInterface = primaryInterface, constructor });
     }
 
     [Template]
-    public TInterface CreateTemplate<[CompileTime] TInterface>([CompileTime] INamedType memberType,
-        [CompileTime] IConstructor constructor)
+    public static TInterface CreateTemplateDefaultConstructor<[CompileTime] TInterface>(
+        [CompileTime] INamedType memberType)
     {
-        // meta.DebugBreak();
-        return constructor.Invoke(constructor.Parameters.Select(param => (IExpression)param.Value));
+        var constructor = meta.CompileTime(memberType.Constructors.GetPublicDefaultConstructor());
+        return constructor.Invoke()!;
+    }
+
+    [Template]
+    public static TInterface CreateTemplate<[CompileTime] TInterface>([CompileTime] IConstructor constructor)
+    {
+        return constructor.Invoke(constructor.Parameters.Select(param => (IExpression)param.Value!));
     }
 }
