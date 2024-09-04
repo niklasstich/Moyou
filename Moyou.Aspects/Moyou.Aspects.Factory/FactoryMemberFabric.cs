@@ -41,14 +41,17 @@ public class FactoryMemberFabric : TransitiveProjectFabric
     
     public override void AmendProject(IProjectAmender amender)
     {
-        var types = amender.SelectTypes().Where(type => type.HasAttribute<FactoryMemberAttribute>());
+        var types = amender
+            .SelectTypes()
+            .Where(type => type.HasAttribute<FactoryMemberAttribute>());
         types.AddAspect(type => BuildAspect(type, amender));
     }
 
     private static FactoryMemberAspect BuildAspect(INamedType type, IProjectAmender amender)
     {
-        var memberAttributes =
-            type.Attributes.Where(attr => attr.Type.FullName == typeof(FactoryMemberAttribute).FullName);
+        var memberAttributes = type
+            .Attributes
+            .Where(attr => attr.Type.FullName == typeof(FactoryMemberAttribute).FullName);
         var targetTuples = GetTypeTuplesFromAttributes(type, memberAttributes, amender);
         var aspect = new FactoryMemberAspect(targetTuples);
         return aspect;
@@ -58,8 +61,11 @@ public class FactoryMemberFabric : TransitiveProjectFabric
         IEnumerable<IAttribute> memberAttributes,
         IProjectAmender amender)
     {
-        return memberAttributes.Select(GetTypeAndInterfaceTuple).Where(tuple => tuple.HasValue)
-            .Select(tuple => tuple.Value).ToList();
+        return memberAttributes
+            .Select(GetTypeAndInterfaceTuple)
+            .Where(tuple => tuple.HasValue)
+            .Select(tuple => tuple.Value)
+            .ToList();
 
         (INamedType, INamedType?)? GetTypeAndInterfaceTuple(IAttribute attr)
         {
