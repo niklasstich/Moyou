@@ -44,6 +44,20 @@ public class FactoryMemberFabric : TransitiveProjectFabric
         var types = amender
             .SelectTypes()
             .Where(type => type.HasAttribute<FactoryMemberAttribute>());
+        types
+            .SelectMany(type => type.Attributes)
+            .Where(attribute => attribute.Type.FullName == typeof(FactoryMemberAttribute).FullName)
+            .Where(attribute =>
+            {
+                Debugger.Break();
+                return !attribute.TryGetNamedArgument(nameof(FactoryMemberAttribute.TargetType), out _);
+            })
+            .ReportDiagnostic(attribute =>
+            {
+                Debugger.Break();
+                return ErrorNoTargetTypeInMemberAttribute.WithArguments(
+                    (INamedType)attribute.TargetDeclaration.GetTarget(ReferenceResolutionOptions.Default));
+            });
         types.AddAspect(type => BuildAspect(type, amender));
     }
 
@@ -69,13 +83,8 @@ public class FactoryMemberFabric : TransitiveProjectFabric
 
         (INamedType, INamedType?)? GetTypeAndInterfaceTuple(IAttribute attr)
         {
-            Debugger.Break();
             if (!attr.NamedArguments.TryGetValue(nameof(FactoryMemberAttribute.TargetType), out var targetTypeConstant))
-            {
-                //TODO: figure out why this doesn't show up in compile time test
-                amender.ReportDiagnostic(_ => ErrorNoTargetTypeInMemberAttribute.WithArguments(factoryType));
                 return null;
-            }
             var targetType = (INamedType)targetTypeConstant.Value!;
             var implementedInterfaces = targetType.ImplementedInterfaces;
             if (attr.NamedArguments.TryGetValue(nameof(FactoryMemberAttribute.PrimaryInterface),
