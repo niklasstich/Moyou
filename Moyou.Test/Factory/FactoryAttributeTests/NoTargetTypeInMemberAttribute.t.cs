@@ -1,1 +1,1 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+// Error MOYOU2201 on `FactoryA`: `No TargetType in [FactoryMember] on factory FactoryA.`

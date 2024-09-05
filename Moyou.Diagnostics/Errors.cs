@@ -22,7 +22,7 @@ public class Errors
         public static string TypeDoesntImplementAnyInterfacesId => "MOYOU2202";
 
         public static string TypeDoesntImplementAnyInterfacesMessageFormat =>
-            "TargetType {0} doesn't implement any interfaces in [FactoryMember] on factory {1}.";
+            "TargetType doesn't implement any interfaces in [FactoryMember] on factory {0}.";
 
         public static string TypeDoesntImplementAnyInterfacesTitle => "TargetType doesn't implement any interfaces.";
 
@@ -34,7 +34,7 @@ public class Errors
         public static string AmbiguousInterfacesOnTargetTypeId => "MOYOU2203";
 
         public static string AmbiguousInterfacesOnTargetTypeMessageFormat =>
-            "TargetType {0} in [FactoryMember] on factory {1} implements multiple interfaces. " +
+            "TargetType in [FactoryMember] on factory {0} implements multiple interfaces. " +
             "You must define which one to use for the return type of the factory by defining it via the PrimaryInterface property.";
 
         public static string AmbiguousInterfacesOnTargetTypeTitle => "Ambiguous interfaces on TargetType.";
@@ -46,7 +46,7 @@ public class Errors
         public static string TargetTypeDoesntImplementPrimaryInterfaceId => "MOYOU2204";
 
         public static string TargetTypeDoesntImplementPrimaryInterfaceMessageFormat =>
-            "TargetType {0} in [FactoryMember] on factory {1} does not implement PrimaryInterface {2}.";
+            "TargetType in [FactoryMember] on factory {0} does not implement PrimaryInterface.";
 
         public static string TargetTypeDoesntImplementPrimaryInterfaceTitle =>
             "TargetType doesn't implement PrimaryInterface.";

@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Metalama.Framework" Version="2024.2.19" />
+      <PackageReference Include="Metalama.Framework" Version="2024.2.23" />
     </ItemGroup>
 
 </Project>
