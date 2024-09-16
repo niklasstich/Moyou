@@ -3,7 +3,7 @@
   "isRoot": true,
   "tools": {
     "metalama.tool": {
-      "version": "2024.2.23",
+      "version": "2024.2.24",
       "commands": [
         "metalama"
       ]
