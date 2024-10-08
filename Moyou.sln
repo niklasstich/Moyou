@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moyou.Aspects.Singleton", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moyou.Diagnostics", "Moyou.Diagnostics\Moyou.Diagnostics.csproj", "{243A9CB0-E58E-4A0D-AF02-4E4B18B24A5E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moyou.Aspects.Factory", "Moyou.Aspects\Moyou.Aspects.Factory\Moyou.Aspects.Factory.csproj", "{C6137E15-091A-4221-AB3D-218AD6BBE96B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Moyou.Aspects.UnsavedChanges", "Moyou.Aspects\Moyou.Aspects.UnsavedChanges\Moyou.Aspects.UnsavedChanges.csproj", "{2F05FD3A-8A3E-4560-95E5-70C428D176FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +64,18 @@ Global
 		{243A9CB0-E58E-4A0D-AF02-4E4B18B24A5E}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
 		{243A9CB0-E58E-4A0D-AF02-4E4B18B24A5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{243A9CB0-E58E-4A0D-AF02-4E4B18B24A5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.LamaDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.LamaDebug|Any CPU.Build.0 = Debug|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -70,5 +86,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{5D94EA8C-2A35-49D7-A108-2712FDA6E573} = {12BCCD59-0094-404A-9EA9-B2799EA6E608}
 		{35B48390-E209-4858-876D-22C1B6C98A07} = {12BCCD59-0094-404A-9EA9-B2799EA6E608}
+		{C6137E15-091A-4221-AB3D-218AD6BBE96B} = {12BCCD59-0094-404A-9EA9-B2799EA6E608}
+		{2F05FD3A-8A3E-4560-95E5-70C428D176FC} = {12BCCD59-0094-404A-9EA9-B2799EA6E608}
 	EndGlobalSection
 EndGlobal
