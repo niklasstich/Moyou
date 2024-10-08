@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.UnsavedChanges\Moyou.Aspects.UnsavedChanges.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Factory\" />
+  </ItemGroup>
+
 </Project>

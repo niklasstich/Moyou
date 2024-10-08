@@ -1,6 +1,4 @@
 ﻿using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Diagnostics;
 
 namespace Moyou.Diagnostics;
 
@@ -43,6 +41,7 @@ public static class Warnings
             "Singleton class {0} should have no accessible constructors. Found constructor with signature: {1}.";
         public static string HasAccessibleConstructorTitle => "Singleton class should have no accessible constructors";
         public static string HasAccessibleConstructorCategory => "Singleton";
+        
         public static string HasImplicitPublicConstructorId => "MOYOU1102";
 
         public static string HasImplicitPublicConstructorMessageFormat =>

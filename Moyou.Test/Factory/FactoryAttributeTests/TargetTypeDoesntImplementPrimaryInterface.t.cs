@@ -1,0 +1,2 @@
+// Error MOYOU2202 on `FactoryD`: `TargetType doesn't implement any interfaces in [FactoryMember] on factory FactoryD.`
+// Error MOYOU2204 on `FactoryD`: `TargetType in [FactoryMember] on factory FactoryD does not implement PrimaryInterface.`
