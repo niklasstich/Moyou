@@ -1,0 +1,1 @@
+// Error MOYOU2203 on `FactoryC`: `TargetType in [FactoryMember] on factory FactoryC implements multiple interfaces. You must define which one to use for the return type of the factory by defining it via the PrimaryInterface property.`
