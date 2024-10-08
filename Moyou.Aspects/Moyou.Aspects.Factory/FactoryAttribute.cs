@@ -40,7 +40,6 @@ public class FactoryAttribute : TypeAspect
 
     private void AddMemberToFactory(IAspectBuilder<INamedType> builder, (INamedType, INamedType) tuple)
     {
-        Debugger.Break();
         var memberType = tuple.Item1;
         var primaryInterface = tuple.Item2;
         var trimmedInterfaceName = primaryInterface.Name.StartsWith("I")
@@ -98,7 +97,6 @@ public class FactoryAttribute : TypeAspect
 
         builder.IntroduceMethod(nameof(CreateTemplate), IntroductionScope.Instance, buildMethod: builder =>
         {
-            // Debugger.Break();
             builder.Name = $"Create{trimmedInterfaceName}";
             builder.Accessibility = Accessibility.Public;
             //add all constructor parameters to factory method
