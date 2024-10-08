@@ -45,6 +45,7 @@
 		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.Factory\Moyou.Aspects.Factory.csproj" />
 		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.Memento\Moyou.Aspects.Memento.csproj" />
 		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.Singleton\Moyou.Aspects.Singleton.csproj" />
+		<ProjectReference Include="..\Moyou.Aspects\Moyou.Aspects.UnsavedChanges\Moyou.Aspects.UnsavedChanges.csproj" />
 	</ItemGroup>
 
 </Project>
