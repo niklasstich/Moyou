@@ -214,7 +214,6 @@ public class MementoAttribute : TypeAspect
             //assign some fields
             var targetFieldOrProp = introducedFieldsOnMementoList
                 .Single(memFieldOrProp => memFieldOrProp.Name == sourceFieldOrProp.Name).With(memento);
-            meta.DebugBreak();
             if (!(sourceFieldOrProp.Type.IsReferenceType ?? false))
                 targetFieldOrProp.Value = sourceFieldOrProp.Value;
             else if (sourceFieldOrProp.Type.Is(SpecialType.String, ConversionKind.TypeDefinition)) //strings are immutable

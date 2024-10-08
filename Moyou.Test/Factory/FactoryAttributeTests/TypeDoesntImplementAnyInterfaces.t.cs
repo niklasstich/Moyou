@@ -1,0 +1,1 @@
+// Error MOYOU2202 on `FactoryB`: `TargetType doesn't implement any interfaces in [FactoryMember] on factory FactoryB.`
