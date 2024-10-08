@@ -1,11 +1,6 @@
 using Moyou.Aspects.Factory;
 namespace Moyou.CompileTimeTest.Factory.FactoryAttributeTests;
-[AbstractFactory]
-public interface AbstractUIFactory
-{
-  IButton CreateButton();
-}
-[Factory(AbstractFactoryType = typeof(AbstractUIFactory))]
+[Factory]
 [FactoryMember(TargetType = typeof(WindowsButton))]
 [FactoryMember(TargetType = typeof(WindowsWindow))]
 public class WindowsUIFactory
@@ -19,7 +14,7 @@ public class WindowsUIFactory
     return new global::Moyou.CompileTimeTest.Factory.FactoryAttributeTests.WindowsWindow((global::Moyou.CompileTimeTest.Factory.FactoryAttributeTests.WindowsButton)button);
   }
 }
-[Factory(AbstractFactoryType = typeof(AbstractUIFactory))]
+[Factory]
 [FactoryMember(TargetType = typeof(MacButton))]
 [FactoryMember(TargetType = typeof(MacWindow))]
 public class MacUIFactory

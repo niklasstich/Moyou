@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Diagnostics;
 using Moyou.Diagnostics;
 using Moyou.Extensions;
@@ -13,8 +12,6 @@ namespace Moyou.Aspects.Factory;
 [AttributeUsage(AttributeTargets.Class)]
 public class FactoryAttribute : TypeAspect
 {
-    public Type? AbstractFactoryType { get; set; }
-
     private static readonly DiagnosticDefinition<INamedType> ErrorNoSuitableConstructor =
         new(Errors.Factory.NoSuitableConstructorId, Severity.Error,
             Errors.Factory.NoSuitableConstructorMessageFormat,
