@@ -45,7 +45,8 @@ public class FactoryAttribute : TypeAspect
         var trimmedInterfaceName = primaryInterface.Name.StartsWith("I")
             ? primaryInterface.Name[1..]
             : primaryInterface.Name;
-        if (memberType.HasPublicDefaultConstructor())
+        if (memberType.HasPublicDefaultConstructor() &&
+            !memberType.Constructors.Any(ctor => ctor.HasAttribute<FactoryConstructorAttribute>()))
         {
             builder.IntroduceMethod(nameof(CreateTemplateDefaultConstructor), IntroductionScope.Instance,
                 buildMethod: methodBuilder =>
@@ -79,7 +80,8 @@ public class FactoryAttribute : TypeAspect
             catch (InvalidOperationException iox)
             {
                 //only one constructor with attribute allowed
-                foreach (var markedCtor in memberType.Constructors.Where(ctor => ctor.HasAttribute<FactoryConstructorAttribute>()))
+                foreach (var markedCtor in memberType.Constructors.Where(ctor =>
+                             ctor.HasAttribute<FactoryConstructorAttribute>()))
                 {
                     builder.Diagnostics.Report(ErrorMultipleMarkedConstructors.WithArguments(memberType), markedCtor);
                 }
