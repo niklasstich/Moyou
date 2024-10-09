@@ -4,8 +4,8 @@ namespace Moyou.CompileTimeTest.MementoTests.RestoreHookAttributeTests;
 [Memento]
 internal class HasParameterOfWrongType
 {
-    [MementoCreateHook]
-    public void CreateMementoHook(int parameter)
+    [MementoRestoreHook]
+    public void RestoreMementoHook(int parameter)
     {
     }
 

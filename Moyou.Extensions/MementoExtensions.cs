@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System.Diagnostics;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
@@ -13,15 +14,15 @@ public static class MementoExtensions
         builder.MustSatisfyAll(innerBuilder =>
         {
             innerBuilder.MustSatisfy(method => method.Parameters.Count == 1,
-                method => $"{method.Description} must have exactly one parameter");
+                method => $"{method.Description} must have exactly one parameter of the Memento type");
             innerBuilder.MustSatisfy(method =>
             {
-                var mementoType = method.DeclaringType.NestedTypes.FirstOrDefault(type => type.Name == "Memento");
-                return mementoType != null && method.Parameters[0].Type.Is(mementoType);
+                var parameterType = (INamedType)method.Parameters[0].Type;
+                return parameterType.Name.Split('.').Last() == "Memento" && parameterType.DeclaringType == method.DeclaringType;
             }, method =>
             {
                 var mementoType =
-                    method.Object.DeclaringType.NestedTypes.FirstOrDefault(type => type.Name == "Memento");
+                    method.Object.DeclaringType.Types.FirstOrDefault(type => type.Name == "Memento");
                 return $"{method.Description} must have exactly one parameter of type {mementoType?.FullName}";
             });
         });

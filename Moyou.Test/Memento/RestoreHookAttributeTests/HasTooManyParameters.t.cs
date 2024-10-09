@@ -1,1 +1,1 @@
-// Error LAMA0037 on `MementoRestoreHook`: `The aspect 'MementoRestoreHook' cannot be applied to the method 'HasTooManyParameters.RestoreMementoHook(int, int, int)' because 'HasTooManyParameters.RestoreMementoHook(int, int, int)' must have exactly one parameter.`
+// Error LAMA0037 on `MementoRestoreHook`: `The aspect 'MementoRestoreHook' cannot be applied to the method 'HasTooManyParameters.RestoreMementoHook(int, int, int)' because 'HasTooManyParameters.RestoreMementoHook(int, int, int)' must have exactly one parameter of the Memento type.`

@@ -5,6 +5,9 @@ using Metalama.Framework.Eligibility;
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using Metalama.Framework.Advising;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Moyou.Diagnostics;
 using Moyou.Extensions;
 
@@ -41,6 +44,19 @@ public class MementoAttribute : TypeAspect
                 Warnings.Memento.NonSupportedMemberInStrictModeMessageFormat,
                 Warnings.Memento.NonSupportedMemberInStrictModeTitle,
                 Warnings.Memento.NonSupportedMemberInStrictModeCategory);
+    
+    /// <summary>
+    /// MOYOU1002
+    /// </summary>
+    /// <remarks>
+    /// INamedType should be target originator type
+    /// </remarks>
+    private static readonly DiagnosticDefinition<INamedType>
+        WarningNoMementoNestedClass =
+            new(Warnings.Memento.NoMementoNestedClassId, Severity.Warning,
+                Warnings.Memento.NoMementoNestedClassMessageFormat,
+                Warnings.Memento.NoMementoNestedClassTitle,
+                Warnings.Memento.NoMementoNestedClassCategory);
 
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
@@ -63,7 +79,14 @@ public class MementoAttribute : TypeAspect
             relevantMembers = relevantMembers.Except(membersWithUnsupportedTypes).ToList();
         }
 
-        var nestedMementoType = builder.Target.NestedTypes.First(NestedTypeIsEligible);
+        var res = builder.Advice.IntroduceClass(builder.Target, "Memento", OverrideStrategy.Ignore);
+        if (res.Outcome == AdviceOutcome.Default)
+        {
+            builder.Diagnostics.Report(WarningNoMementoNestedClass.WithArguments(builder.Target), builder.Target);
+        }
+        var nestedMementoType = res.Outcome == AdviceOutcome.Default
+            ? res.Declaration
+            : builder.Target.NestedTypes.First(NestedTypeIsEligible);
 
         //introduce relevant fields and properties to the memento type
         var introducedFieldsOnMemento = IntroduceMementoTypeFields().ToList();
@@ -145,9 +168,9 @@ public class MementoAttribute : TypeAspect
     public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
     {
         base.BuildEligibility(builder);
-        builder.MustSatisfy(type => type.NestedTypes.Any(NestedTypeIsEligible),
-            type =>
-                $"{type.Description} must contain a nested private class, (struct) record or struct called 'Memento''");
+        // builder.MustSatisfy(type => type.NestedTypes.Any(NestedTypeIsEligible),
+        //     type =>
+        //         $"{type.Description} must contain a nested private class, (struct) record or struct called 'Memento''");
         builder.MustNotBeAbstract();
         builder.MustNotBeInterface();
     }
