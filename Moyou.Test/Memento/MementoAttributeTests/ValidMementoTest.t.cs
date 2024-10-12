@@ -2,7 +2,7 @@ using Moyou.Aspects.Memento;
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 #pragma warning disable CS0169 // Field is never used
 namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
-[Memento(StrictnessMode = MementoStrictnessMode.Loose)]
+[Memento(StrictnessMode = StrictnessMode.Loose)]
 internal class ValidMementoTest : global::Moyou.Aspects.Memento.IOriginator
 {
   public int A { get; set; }

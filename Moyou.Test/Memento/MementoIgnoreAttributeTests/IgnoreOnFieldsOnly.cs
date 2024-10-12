@@ -2,7 +2,7 @@ using Moyou.Aspects.Memento;
 
 namespace Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests;
 
-[Memento(StrictnessMode = MementoStrictnessMode.Loose, MemberMode = MementoMemberMode.FieldsOnly)]
+[Memento(StrictnessMode = StrictnessMode.Loose, MemberMode = MemberMode.FieldsOnly)]
 public class IgnoreOnFieldsOnly
 {
     [MementoIgnore]

@@ -5,7 +5,7 @@
 
 namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
 
-[Memento(StrictnessMode = MementoStrictnessMode.Loose)]
+[Memento(StrictnessMode = StrictnessMode.Loose)]
 internal class ValidMementoTest
 {
     public int A { get; set; }

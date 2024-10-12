@@ -4,7 +4,7 @@ namespace Moyou.UnitTest.Memento;
 
 #pragma warning disable 0649
 #pragma warning disable 8618
-[Memento(StrictnessMode = MementoStrictnessMode.Loose)]
+[Memento(StrictnessMode = StrictnessMode.Loose)]
 internal partial class MementoDummy
 {
     public int A { get; set; }

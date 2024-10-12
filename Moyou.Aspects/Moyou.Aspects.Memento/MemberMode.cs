@@ -6,7 +6,7 @@ namespace Moyou.Aspects.Memento;
 /// Defines which members of the target type should be included in the memento.
 /// </summary>
 [CompileTime]
-public enum MementoMemberMode
+public enum MemberMode
 {
     /// <summary>
     /// Include both properties and fields of the target type.

@@ -1,6 +1,6 @@
 using Moyou.Aspects.Memento;
 namespace Moyou.CompileTimeTest.MementoTests.MementoIgnoreAttributeTests;
-[Memento(StrictnessMode = MementoStrictnessMode.Loose, MemberMode = MementoMemberMode.PropertiesOnly)]
+[Memento(StrictnessMode = StrictnessMode.Loose, MemberMode = MemberMode.PropertiesOnly)]
 public class IgnoreOnPropertiesOnly : global::Moyou.Aspects.Memento.IOriginator
 {
   [MementoIgnore]

@@ -2,7 +2,7 @@ using Moyou.Aspects.Memento;
 
 namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
 
-[Memento(MemberMode = MementoMemberMode.FieldsOnly, StrictnessMode = MementoStrictnessMode.Loose)]
+[Memento(MemberMode = MemberMode.FieldsOnly, StrictnessMode = StrictnessMode.Loose)]
 public class FieldsOnly
 {
     public int A { get; set; }

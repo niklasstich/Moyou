@@ -2,7 +2,7 @@ using Moyou.Aspects.Memento;
 
 namespace Moyou.CompileTimeTest.MementoTests.MementoAttributeTests;
 
-[Memento(MemberMode = MementoMemberMode.PropertiesOnly, StrictnessMode = MementoStrictnessMode.Loose)]
+[Memento(MemberMode = MemberMode.PropertiesOnly, StrictnessMode = StrictnessMode.Loose)]
 public class PropertiesOnly
 {
     public int A { get; set; }

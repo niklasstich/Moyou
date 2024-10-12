@@ -19,17 +19,17 @@ public class MementoAttribute : TypeAspect
     /// Defines the strictness of the memento aspect.
     /// </summary>
     /// <remarks>
-    /// See <seealso cref="MementoStrictnessMode"/> for details.
+    /// See <seealso cref="Memento.StrictnessMode"/> for details.
     /// </remarks>
-    public MementoStrictnessMode StrictnessMode { get; set; } = MementoStrictnessMode.Strict;
+    public StrictnessMode StrictnessMode { get; set; } = StrictnessMode.Strict;
 
     /// <summary>
     /// Defines which members of the target type should be included in the memento.
     /// </summary>
     /// <remarks>
-    /// See <seealso cref="MementoMemberMode"/> for details.
+    /// See <seealso cref="Memento.MemberMode"/> for details.
     /// </remarks>
-    public MementoMemberMode MemberMode { get; set; } = MementoMemberMode.All;
+    public MemberMode MemberMode { get; set; } = MemberMode.All;
 
     /// <summary>
     /// MOYOU1001
@@ -65,7 +65,7 @@ public class MementoAttribute : TypeAspect
         var relevantMembers = GetRelevantMembers()
             .ToList();
 
-        if (StrictnessMode is MementoStrictnessMode.Strict)
+        if (StrictnessMode is StrictnessMode.Strict)
         {
             var membersWithUnsupportedTypes =
                 relevantMembers.Where(member => !IsTypeOfMemberSupported(member)).ToList();
@@ -124,9 +124,9 @@ public class MementoAttribute : TypeAspect
         {
             return (MemberMode switch
             {
-                MementoMemberMode.All => GetRelevantFields().Union(GetRelevantProperties()),
-                MementoMemberMode.FieldsOnly => GetRelevantFields(),
-                MementoMemberMode.PropertiesOnly => GetRelevantProperties(),
+                MemberMode.All => GetRelevantFields().Union(GetRelevantProperties()),
+                MemberMode.FieldsOnly => GetRelevantFields(),
+                MemberMode.PropertiesOnly => GetRelevantProperties(),
                 _ => throw new InvalidOperationException($"Invalid value for {nameof(MemberMode)}")
             })
                 //Only collect members we can write to

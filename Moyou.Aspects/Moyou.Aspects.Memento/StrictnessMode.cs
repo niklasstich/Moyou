@@ -6,7 +6,7 @@ namespace Moyou.Aspects.Memento;
 /// Defines the strictness of the memento aspect.
 /// </summary>
 [CompileTime]
-public enum MementoStrictnessMode
+public enum StrictnessMode
 {
     /// <summary>
     /// In this mode, when the memento attribute encounters a member that is neither a value type, a known default collection type nor implements <see cref="ICloneable"/>, it will simply assign the value of the original member to the memento member.
