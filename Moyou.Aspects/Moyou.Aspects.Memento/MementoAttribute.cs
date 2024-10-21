@@ -168,9 +168,6 @@ public class MementoAttribute : TypeAspect
     public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
     {
         base.BuildEligibility(builder);
-        // builder.MustSatisfy(type => type.NestedTypes.Any(NestedTypeIsEligible),
-        //     type =>
-        //         $"{type.Description} must contain a nested private class, (struct) record or struct called 'Memento''");
         builder.MustNotBeAbstract();
         builder.MustNotBeInterface();
     }
