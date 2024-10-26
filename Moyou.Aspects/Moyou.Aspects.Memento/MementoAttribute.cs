@@ -106,7 +106,7 @@ public class MementoAttribute : TypeAspect
             });
 
         builder.Advice.IntroduceMethod(builder.Target, nameof(CreateMementoImpl),
-            args: new { TMementoType = nestedMementoType, relevantMembers, introducedFieldsOnMemento, builder },
+            args: new { TMementoType = nestedMementoType, relevantMembers, introducedFieldsOnMemento },
             scope: IntroductionScope.Instance, whenExists: OverrideStrategy.Override, buildMethod: builder =>
             {
                 builder.Accessibility = Accessibility.Private;
@@ -115,9 +115,11 @@ public class MementoAttribute : TypeAspect
         return;
 
         IEnumerable<IField> IntroduceMementoTypeFields() => relevantMembers
-            .Select(fieldOrProperty => builder.Advice.IntroduceField(nestedMementoType, fieldOrProperty.Name,
-                fieldOrProperty.Type, IntroductionScope.Instance,
-                buildField: fBuilder => fBuilder.Accessibility = Accessibility.Public))
+            .Select(fieldOrProperty => 
+                builder.Advice.IntroduceField(nestedMementoType, fieldOrProperty.Name,
+                    fieldOrProperty.Type, IntroductionScope.Instance,
+                    buildField: fBuilder => fBuilder.Accessibility = Accessibility.Public)
+                )
             .Select(r => r.Declaration);
 
         IEnumerable<IFieldOrProperty> GetRelevantMembers()
@@ -222,8 +224,7 @@ public class MementoAttribute : TypeAspect
     [Template]
     public IMemento CreateMementoImpl<[CompileTime] TMementoType>(
         [CompileTime] IEnumerable<IFieldOrProperty> relevantMembers,
-        [CompileTime] IEnumerable<IFieldOrProperty> introducedFieldsOnMemento,
-        IAspectBuilder<INamedType> builder) where TMementoType : IMemento, new()
+        [CompileTime] IEnumerable<IFieldOrProperty> introducedFieldsOnMemento) where TMementoType : IMemento, new()
     {
         var memento = new TMementoType();
         //prevent multiple enumerations
@@ -245,7 +246,7 @@ public class MementoAttribute : TypeAspect
             }
             else if (sourceFieldOrProp.Type.Is(SpecialType.IEnumerable_T, ConversionKind.TypeDefinition))
             {
-                HandleIEnumerable(sourceFieldOrProp, targetFieldOrProp, builder);
+                HandleIEnumerable(sourceFieldOrProp, targetFieldOrProp);
             }
             else
             {
@@ -258,8 +259,7 @@ public class MementoAttribute : TypeAspect
     }
 
     [Template]
-    private void HandleIEnumerable(IFieldOrProperty sourceFieldOrProp, IExpression targetFieldOrProp,
-        IAspectBuilder<INamedType> builder)
+    private void HandleIEnumerable(IFieldOrProperty sourceFieldOrProp, IExpression targetFieldOrProp)
     {
         var namedType = (INamedType)sourceFieldOrProp.Type;
         //copy-via-To[Collection]() types
