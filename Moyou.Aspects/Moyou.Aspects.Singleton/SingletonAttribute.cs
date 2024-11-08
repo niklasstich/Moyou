@@ -62,19 +62,6 @@ public class SingletonAttribute : TypeAspect
     {
         base.BuildAspect(builder);
         
-        /*
-        var implicitPublicConstructor = builder.Target.Constructors.SingleOrDefault(constructor =>
-            constructor is { Accessibility: Accessibility.Public, IsImplicitlyDeclared: true, Parameters.Count: 0 });
-
-        if (implicitPublicConstructor != null)
-        {
-            //TODO: if implicit public constructor exists, override it with a private constructor
-            //TODO: only possible after feature of defining own constructors becomes available in Metalama 2024.2
-        }
-        */
-
-
-
         // warning if there are any non-private constructors
         var constructors = builder.Target.Constructors.ToList();
         var first = constructors.First();
