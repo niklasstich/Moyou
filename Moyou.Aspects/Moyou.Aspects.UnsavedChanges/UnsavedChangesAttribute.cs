@@ -86,7 +86,7 @@ public class UnsavedChangesAttribute : TypeAspect
                 // ReSharper disable once ArrangeRedundantParentheses because we need the parantheses in the expression
                 exprBuilder.AppendExpression((member.Value?.UnsavedChanges ?? false));
             else
-                exprBuilder.AppendExpression(member.Value?.UnsavedChanges);
+                exprBuilder.AppendExpression(member.Value!.UnsavedChanges);
         }
 
         foreach (var member in relevantIEnumerableMembers)
