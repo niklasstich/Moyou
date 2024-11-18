@@ -2,6 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Eligibility;
 using Moyou.Extensions;
 
 namespace Moyou.Aspects.UnsavedChanges;
@@ -17,6 +18,12 @@ namespace Moyou.Aspects.UnsavedChanges;
 /// <seealso cref="IUnsavedChanges"/>
 public class UnsavedChangesAttribute : TypeAspect
 {
+    public override void BuildEligibility(IEligibilityBuilder<INamedType> builder)
+    {
+        base.BuildEligibility(builder);
+        builder.MustNotBeInterface();
+    }
+    
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
         base.BuildAspect(builder);
@@ -26,14 +33,14 @@ public class UnsavedChangesAttribute : TypeAspect
         builder.IntroduceField(nameof(_internalUnsavedChanges), IntroductionScope.Instance, buildField:
             fbuilder => { fbuilder.Accessibility = Accessibility.Private; });
 
-        //find all members whose type implements UnsavedChangesAttribute themselves (via interface)
+        //find all members whose type implements UnsavedChangesAttribute themselves (via attribute)
         var relevantMembers = builder.Target.AllFieldsAndProperties
             .Where(member => member.TypeHasAttribute(typeof(UnsavedChangesAttribute)))
             //exclude auto backing fields
             .Where(member => member is not IField field || !field.IsAutoBackingField())
             .ToList();
 
-        //find all members whose type is ienumerable of a type that implements UnsavedChangesAttribute (via interface)
+        //find all members whose type is ienumerable of a type that implements UnsavedChangesAttribute (via attribute)
         var relevantIEnumerableMembers = builder.Target.AllFieldsAndProperties
             .Where(member => member.Type is INamedType ntype &&
                              //strings are IEnumerable<char> so we need to exclude them
