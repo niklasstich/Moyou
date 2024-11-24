@@ -66,16 +66,18 @@ public class FactoryAttribute : TypeAspect
         string trimmedInterfaceName, INamedType primaryInterface)
     {
         IConstructor? constructor;
-        if (memberType.Constructors.Count == 1)
+        if (memberType.Constructors.Count(constructor => constructor.Accessibility == Accessibility.Public) == 1)
         {
-            constructor = memberType.Constructors.Single();
+            constructor =
+                memberType.Constructors.Single(constructor => constructor.Accessibility == Accessibility.Public);
         }
         else
         {
             try
             {
                 constructor =
-                    memberType.Constructors.SingleOrDefault(ctor => ctor.HasAttribute<FactoryConstructorAttribute>());
+                    memberType.Constructors.SingleOrDefault(ctor =>
+                        ctor.HasAttribute<FactoryConstructorAttribute>() && ctor.Accessibility == Accessibility.Public);
             }
             catch (InvalidOperationException iox)
             {
