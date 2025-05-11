@@ -9,3 +9,5 @@ implementation of various different common software design and programming patte
 
 Examples of how to use (and how not to use) the aspects and the code they generate can be found in the
 Moyou.CompileTimeTest project.
+
+My thesis, for which I created this project, can be found [here](https://github.com/niklasstich/master-thesis)
